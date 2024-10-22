@@ -153,6 +153,16 @@ let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
                           let conversationstartTime = await convertData(participant.startTime);
                           let policyNumber = await convertData(participant.attributes.POLICY_NUMBER);
 
+                          await apiInstance.postConversationDisconnect(ucid)
+                            .then(async (data) => {
+                              console.log(`TLP_Voicemail postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                              log.info(`TLP_Voicemail postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                            })
+                            .catch(async (err) => {
+                              console.log(`TLP_Voicemail There was a failure calling postConversationDisconnect : ${ucid}`);
+                              console.error(err);
+                            });
+
                           //log.info('ucid : '+ucid);
                           //log.info('customerphoneNumber : '+customerphoneNumber);
                           //log.info('policyNumber : '+policyNumber);
