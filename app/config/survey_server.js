@@ -40,7 +40,7 @@ module.exports = {
     client_secret: "uKatOGmz1xzmYVgv1MsMz8O_H-pDMebb8EHTDFTV-x0",
     data_process_inbox: "./process_data/inbox",
     data_process_outbox: "./process_data/outbox",
-    data_query_period: 20,
+    data_query_period: 10,
 
 
     SURVEY_DIVISION_DATA_TABLE:{

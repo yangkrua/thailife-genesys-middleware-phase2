@@ -284,29 +284,57 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   let DNIS_NUMBER = participant.attributes["DNIS_NUMBER"] === undefined ? "" : participant.attributes["DNIS_NUMBER"];
                   let IVR_DNIS = participant.attributes["IVR_DNIS"] === undefined ? "" : participant.attributes["IVR_DNIS"];
                   
+                  let CX_CALLED = participant.attributes["CX_CALLED"] === undefined ? "" : participant.attributes["CX_CALLED"];
+                  let transfer_InternalVDN = participant.attributes["transfer_InternalVDN"] === undefined ? "" : participant.attributes["transfer_InternalVDN"];
+                  transfer_InternalVDN = await transfer_InternalVDN.replace('+', '');
+                  
                   ANI_NUMBER = await parserTelPhoneNumber(ANI_NUMBER);
                   DNIS_NUMBER = await parserTelPhoneNumber(DNIS_NUMBER);
                   
                   ANI_NUMBER = await parserPhoneNumber(ANI_NUMBER);
                   DNIS_NUMBER = await parserPhoneNumber(DNIS_NUMBER);
                   IVR_DNIS = await parserPhoneNumber(IVR_DNIS);
-                 
+
+                  IVR_DNIS = await IVR_DNIS.replace('+', '');
+                  DNIS_NUMBER = await DNIS_NUMBER.replace('+', '');
+
                   if(await countPipe >=3){
                     let uuiSplit =  uui.split('|');
-                    uui = uuiSplit[0]+'|'+uuiSplit[1]+'|'+uuiSplit[2]+'|'+uuiSplit[3]+"|"+DNIS_NUMBER
+
+                    if(CX_CALLED != ''){
+                      uui = uuiSplit[0]+'|'+uuiSplit[1]+'|'+uuiSplit[2]+'|'+uuiSplit[3]+"|"+IVR_DNIS
+                    }else{
+                      uui = uuiSplit[0]+'|'+uuiSplit[1]+'|'+uuiSplit[2]+'|'+uuiSplit[3]+"|"+DNIS_NUMBER
+                    }
+
+                    
                   }else if(await countPipe <3){
                     checkAddList = false;
                   }
 
-                  if (ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) {
-                    checkAddList = true;
-                  } else {
-                    checkAddList = false;
+                  if(checkAddList){
+                    if (ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) {
+                      checkAddList = true;
+                    } else {
+                      checkAddList = false;
+                    }
                   }
-                  if (DNIS_NUMBER.startsWith("0") && DNIS_NUMBER.length >= 9) {
-                    checkAddList = true;
-                  } else {
-                    checkAddList = false;
+
+                  if(checkAddList){
+                    if ( (DNIS_NUMBER.startsWith("0") && DNIS_NUMBER.length >= 9)
+                      || DNIS_NUMBER.length == 5 || DNIS_NUMBER.length == 4) {
+                      checkAddList = true;
+                    } else {
+                      checkAddList = false;
+                    }
+                  }
+
+                  if(CX_CALLED != ''){
+                    if( transfer_InternalVDN != ''){
+                      DNIS_NUMBER = transfer_InternalVDN;
+                    }else{
+                      DNIS_NUMBER = '47'+CX_CALLED;
+                    }
                   }
 
                   if (checkAddList ) {

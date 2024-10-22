@@ -52,8 +52,8 @@ module.exports = {
 
       data_query_callback_period : 60,
       data_query_voicemail_period : 60,
-      data_query_ABANDON_OUTB_period : 11,
-      data_query_CALLBACK_OUTBOUND_period : 11,
+      data_query_ABANDON_OUTB_period : 60,
+      data_query_CALLBACK_OUTBOUND_period : 60,
       
       //Pro
       filter_by_flow_ids: [ "b15615e1-41f1-4e08-98ac-6283aff41ac5" ],
