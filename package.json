@@ -18,6 +18,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
     "morgan-body": "^2.6.9",
+    "mssql": "^11.0.0",
     "node-fetch": "^3.3.2",
     "path": "^0.12.7",
     "purecloud-platform-client-v2": "^187.0.0",
@@ -25,8 +26,7 @@
     "rotating-file-stream": "^3.2.1",
     "sequelize": "^6.36.0",
     "ssh2-sftp-client": "^10.0.3",
-    "winston": "^3.11.0",
-    "winston-daily-rotate-file": "^4.7.1",
-    "mssql": "^11.0.0"
+    "winston": "^3.15.0",
+    "winston-daily-rotate-file": "^4.7.1"
   }
 }

@@ -1,2 +1,2 @@
-const  config_cc = 'Server=10.102.46.119,1433;Database=NONPROD_IVR_CC_GENESYS;User Id=nonprod_genesys.app;Password=P@ssw0rd#Genesys;Encrypt=false';
+const  config_cc = 'Server=10.102.46.119,1433;Database=IVR_CC;User Id=prod_genesys.app;Password=P@ssw0rd#Env2024;Encrypt=false';
 module.exports = config_cc;

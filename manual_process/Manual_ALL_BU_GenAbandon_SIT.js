@@ -10,25 +10,25 @@ const ucc_genesys   = require('../app/functions/ucc_genesys.js');
 
 async function main() 
 {
-    let pDate = '2024-09-17';
+    let pDate = '2024-10-18';
 
     await acc_genesys.ManualGenAbandonAccInb(await pDate, 'SIT');
 
-    await bay_genesys.ManualGenAbandon(await pDate,'SIT');
+   // await bay_genesys.ManualGenAbandon(await pDate,'SIT');
 
-    await cc_genesys.ManualGenAbandonCareCenter(await pDate,'SIT');
+   // await cc_genesys.ManualGenAbandonCareCenter(await pDate,'SIT');
 
-    await ccc_genesys.ManualGenAbandon(await pDate,'SIT');
+   // await ccc_genesys.ManualGenAbandon(await pDate,'SIT');
 
-    await ccd_genesys.ManualGenAbandon(await pDate,'SIT');
+    //await ccd_genesys.ManualGenAbandon(await pDate,'SIT');
 
-    await cimb_genesys.ManualGenAbandon(await pDate,'SIT');
+    //await cimb_genesys.ManualGenAbandon(await pDate,'SIT');
 
-    await crm_genesys.ManualGenAbandon(await pDate,'SIT');
+   // await crm_genesys.ManualGenAbandon(await pDate,'SIT');
 
-    await pos_genesys.ManualGenAbandon(await pDate,'SIT');
+    //await pos_genesys.ManualGenAbandon(await pDate,'SIT');
 
-    await ucc_genesys.ManualGenAbandon(await pDate,'SIT');
+   // await ucc_genesys.ManualGenAbandon(await pDate,'SIT');
 }
   
-main()
+main();
