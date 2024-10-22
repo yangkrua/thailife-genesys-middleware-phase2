@@ -133,7 +133,7 @@ let getAccessTokenSalesforce = async (urlGetToken) => {
               console.log('saveAbandonCall Error status:', error.response.status);
               console.log('saveAbandonCall Error headers:', error.response.headers);
 
-              await log.error('saveAbandonCall Error data: ' +  error.response.data);
+              await log.error('saveAbandonCall Error data: ' +  JSON.stringify(error.response.data));
               await log.error('saveAbandonCall Error status: ' +  error.response.status);
               await log.error('saveAbandonCall Error headers: '+  error.response.headers);
             } else if (error.request) {

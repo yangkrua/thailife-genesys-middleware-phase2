@@ -186,9 +186,9 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
 };
 
 let saveAbandonCallToSalesforce = async (dataAbandonList) => {
-  log.info( `dataAbandonList Result: ${JSON.stringify(dataAbandonList)}` );
+  log.info( `CC dataAbandonList Result: ${JSON.stringify(dataAbandonList)}` );
   await salesForceService.callApiSaveAbandonCallSalesforce(dataAbandonList,environment);
-  log.info("saveAbandonCallToSalesforce Done");
+  log.info("CC saveAbandonCallToSalesforce Done");
 };
 
 
