@@ -186,7 +186,7 @@ let saveAbandonCallToSalesforce = async (dataAbandonList) => {
 
 let parserAbandonDetail = async (data, dataQueueIdObj) => {
   //await log.info( `======***parserAbandonDetail***, Raw-Data= ${JSON.stringify(data)}` );
-  await log.info(`====== parserAbandonDetail->Begin =======`);
+  await log.info(`====== UCC parserAbandonDetail->Begin =======`);
 
   const dataAbandonList = [];
   for (const item of data.conversations) {
@@ -224,9 +224,6 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   && (await participant.attributes)  !== undefined 
                   && (await participant.attributes["DNIS_NUMBER"])  !== undefined 
                 ) {
-
-
-
                   let userName = '';
                   // Get user.
                   await apiInstanceUsersApi.getUser(userId, opts)
@@ -381,8 +378,9 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
           });
     }
   }
-  console.log( 'dataAbandonList Size :'+dataAbandonList.length );
-  await log.info(`====== parserAbandonDetail->Done! =======`);
+  console.log( 'UCC dataAbandonList Size :'+dataAbandonList.length );
+  await log.info( 'UCC dataAbandonList Size :'+dataAbandonList.length );
+  await log.info(`====== UCC parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
 };
 

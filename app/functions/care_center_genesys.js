@@ -753,7 +753,8 @@ let parserCDR_IVR_Log = async (data,dataQueueIdObj) => {
 
     const isFlowIvrLog = await checkFlowIvrLogInDataTable(item.participants, dataQueueIdObj);
     if(isFlowIvrLog){
-
+      await delay(100);
+      
       await apiInstance.getConversationsCall(item.conversationId)//('e40c2393-0932-456c-b763-37ff90118aff')      //(conversationId)
       .then(async (data) => {
 

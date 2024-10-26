@@ -117,7 +117,7 @@ let VOICEMAIL = async (dataQueueIdObj) => {
 
 let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
  // log.info( `======***parserCDR_BY_Queue_LIST***, Raw-Data= ${JSON.stringify(data)}` );
-  log.info(`====== parserCDR_VOICEMAIL->Begin =======`);
+  log.info(`====== TLP parserCDR_VOICEMAIL->Begin =======`);
 
   let textCRD = '';
 
@@ -163,13 +163,6 @@ let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
                               console.error(err);
                             });
 
-                          //log.info('ucid : '+ucid);
-                          //log.info('customerphoneNumber : '+customerphoneNumber);
-                          //log.info('policyNumber : '+policyNumber);
-                          //log.info('conversation startTime : '+conversationstartTime);
-                          //log.info('////////////');
-                          //log.info('message id : '+message_id);
-
                           textCRD += await (ucid + "|"); //UCID
                           textCRD += await (customerphoneNumber + "|"); //Customer
                           textCRD += await (moment(conversationstartTime).format("YYYY-MM-DD HH:mm:ss") + "|"); //SEGSTART
@@ -188,7 +181,8 @@ let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
                 });    
     }
   }
-  log.info(`====== parserCDR_VOICEMAIL->Done! =======`);
+  console.log("====== TLP parserCDR_VOICEMAIL->Done! =======");
+  log.info(`====== TLP parserCDR_VOICEMAIL->Done! =======`);
   return textCRD;
 };
 
