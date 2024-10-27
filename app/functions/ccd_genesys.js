@@ -276,7 +276,11 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   //let conversationEnd = await moment(item.conversationEnd).format('YYYY-MM-DDTHH:mm:ss.SSS+0000');
 
 
-                  let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"]
+                  let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
+                  if(uui == ''){
+                    uui = "||||";
+                  }
+                  
                   let countPipe  = await uui.split('|').length - 1;
                   let checkAddList = true;
 

@@ -30,7 +30,7 @@ module.exports = {
       port: 22,
       username: "middleware", //sftp_user
       password: "P@ssw0rd", //sftp_pass
-      remote_path: "/UAT",
+      remote_path: "/PROD",
       local_inbox_path: "./process_data/inbox",
       local_outbox_path: "./process_data/outbox",
     },
