@@ -1,0 +1,53 @@
+*/10 * * * * /home/genesys/middleware/genesys_middleware_phase2/Get_Survey_Detail.sh
+0 17-23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_CALLBACK.sh
+0 0-9 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_CALLBACK.sh
+0 17-23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_VOICEMAIL.sh
+0 0-9 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_VOICEMAIL.sh
+0 21-23 * * * /home/genesys/middleware/genesys_middleware_phase2/care_callback.sh
+0 0-8 * * * /home/genesys/middleware/genesys_middleware_phase2/care_callback.sh
+0 21-23 * * * /home/genesys/middleware/genesys_middleware_phase2/care_voicemail.sh
+0 0-8 * * * /home/genesys/middleware/genesys_middleware_phase2/care_voicemail.sh
+0 * * * *  /home/genesys/middleware/genesys_middleware_phase2/TLP_Voicemail.sh
+0 * * * *  /home/genesys/middleware/genesys_middleware_phase2/ivr_log.sh
+0 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_INB_genAbandon.sh
+5 23 * * * /home/genesys/middleware/genesys_middleware_phase2/bay_genAbandon.sh
+10 23 * * * /home/genesys/middleware/genesys_middleware_phase2/care_center_genAbandon.sh
+15 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ccc_genAbandon.sh
+20 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ccd_genAbandon.sh
+25 23 * * * /home/genesys/middleware/genesys_middleware_phase2/cimb_genAbandon.sh
+30 23 * * * /home/genesys/middleware/genesys_middleware_phase2/crm_genAbandon.sh
+35 23 * * * /home/genesys/middleware/genesys_middleware_phase2/pos_genAbandon.sh
+40 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ucc_genAbandon.sh
+0 8-17 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_L_ABANDON_OUTBOUND.sh
+0 18-23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_L_CALLBACK_OUTBOUND.sh
+0 0-8 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_L_CALLBACK_OUTBOUND.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
