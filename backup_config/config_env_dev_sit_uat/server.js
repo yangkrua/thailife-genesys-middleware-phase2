@@ -34,8 +34,8 @@ module.exports = {
   },
   GENESES: {
     org_region: "https://mypurecloud.jp",
-    client_id: "c4d42d58-d09e-4c84-8c34-325a0a1e6490",
-    client_secret: "uKatOGmz1xzmYVgv1MsMz8O_H-pDMebb8EHTDFTV-x0",
+    client_id: "d14944af-c2b2-44c2-a6b4-b3925e959557",
+    client_secret: "4MatjV5bAvy4IIhoV1NzM75olmyg30ocDp6xeME0oTk",
     data_process_inbox: "./process_data/inbox",
     data_process_outbox: "./process_data/outbox",
     data_query_period: 5,

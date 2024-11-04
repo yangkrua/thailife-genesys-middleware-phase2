@@ -25,22 +25,31 @@ let getEvaluationInfomation = async () => {
   await log.info("Start Process getEvaluationInfomation :"+await new Date() );
 
   await genesysService.loginGenesys();
-  const userGenesysList = await genesysService.getListUsers();
 
+  await console.log("Start Process getListUsers :"+await new Date() );
+  const userGenesysList = await genesysService.getListUsers();
+  
+  await console.log("Start Process getPublishedFormsEvaluations :"+await new Date() );
   const publishedFormsEvaluations = await genesysService.getPublishedFormsEvaluations();
 
+  await console.log("Start Process getListEvaluationFormGenesys :"+await new Date() );
   const formEvaluationGenesysList = await genesysService.getListEvaluationFormGenesys();
 
+  await console.log("Start Process filterDuplicateFormEvaluation :"+await new Date() );
   const allFormEvaluationGenesysList = await filterDuplicateFormEvaluation(publishedFormsEvaluations,formEvaluationGenesysList);
 
+  await console.log("Start Process initFormQuestionDetail :"+await new Date() );
   const evaluationFormDetailGenesysList = await initFormQuestionDetail(allFormEvaluationGenesysList);
 
+  await console.log("Start Process getConversationEvaluationDetail :"+await new Date() );
   const conversationEvaluationDetail = await getConversationEvaluationDetail();
 
+  await console.log("Start Process analyzeEvaluationDetail :"+await new Date() );
   const evaluationDetailList = await analyzeEvaluationDetail(conversationEvaluationDetail); 
 
   const userAnswersDataList= [];
 
+  await console.log("Start Loop analyzeEvaluationDetail :"+await new Date() );
   let maxQuestionAndAnswers = 0;
   for(let i = 0 ; i< evaluationDetailList.length ; i++){
     const evaluationDetail = evaluationDetailList[i];
@@ -50,12 +59,14 @@ let getEvaluationInfomation = async () => {
     let evaluationStatus = evaluationDetail.evaluationStatus;
     let evaluatorId  = evaluationDetail.evaluatorId;
     let assigneeId = evaluationDetail.assigneeId;
-
+    let eventTime  = evaluationDetail.eventTime ;
     if(evaluationStatus != 'Pending'){
       let answersEvaluation = await genesysService.getAnswersEvaluationFormGenesys(conversationId,evaluationId);
       
       if (typeof answersEvaluation !== 'undefined'){
 
+        let changedDate = answersEvaluation.changedDate;
+        let assignedDate = answersEvaluation.assignedDate;
         let agentId = answersEvaluation.agent.id;
         let userEvaluation = userGenesysList.filter(obj => obj.id === agentId);
         let evaluatorName = "";
@@ -75,7 +86,8 @@ let getEvaluationInfomation = async () => {
           let divisionName = userEvaluation[0].divisionName;
           let name = userEvaluation[0].name;
           let userName  = userEvaluation[0].userName ;
-
+          let department = userEvaluation[0].department ;
+          let title = userEvaluation[0].title ;
           
           let formName = evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].name;
           let formContextId  = evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].contextId;
@@ -96,8 +108,6 @@ let getEvaluationInfomation = async () => {
               agentComments = answersEvaluation.answers.agentComments;
           }
 
-           
-
           const questionAndAnswersList = await filterQuestionScores(answersEvaluation,evaluationFormDetailGenesysList)
 
           if( maxQuestionAndAnswers < questionAndAnswersList.length ){
@@ -110,6 +120,8 @@ let getEvaluationInfomation = async () => {
           dataFinal.conversationStart = conversationStart;
           dataFinal.userName = userName;
           dataFinal.name = name;
+          dataFinal.department = department;
+          dataFinal.title = title;
           dataFinal.comments = comments;
           dataFinal.agentComments = agentComments;
           dataFinal.divisionName = divisionName;
@@ -122,21 +134,12 @@ let getEvaluationInfomation = async () => {
           dataFinal.formName = formName;
           dataFinal.formModifiedDate = formModifiedDate;
           dataFinal.questionAndAnswersList = questionAndAnswersList;
-
+          dataFinal.changedDate = changedDate;
+          dataFinal.assignedDate = assignedDate;
           userAnswersDataList.push(dataFinal);
 
           console.log("conversationId : " + conversationId);
-          console.log("conversationStart : " + conversationStart);
-          console.log("userName : " + userName);
-          console.log("name : " + name);
-          console.log("divisionName: "+ divisionName);
-          console.log("evaluatorName : " + evaluatorName);
-          console.log("assigneeName : " + assigneeName);
-          console.log("formContextId : " + formContextId);
-          console.log("formId : " + formId);
-          console.log("formName : " + formName);
-          console.log("formModifiedDate : " + formModifiedDate);
-          console.log("evaluationStatus : " + evaluationStatus);
+          console.log("evaluationId : " + evaluationId);
           console.log("------------------------ ");
         }
 
@@ -164,11 +167,29 @@ let convertDateFormattToDDMMYYYY = async (isoDate) => {
 
 }
 
+let convertDateFormatToDDMMYYYYHHMMSS = async (isoDate) => {
+  const date = new Date(isoDate);
+
+  const formattedDate = date.toLocaleDateString('th-TH', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+
+  const formattedTime = date.toLocaleTimeString('th-TH', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  return `${formattedDate} ${formattedTime}`;
+}
 
 let generateCSVFile= async (userAnswersDataList,maxQuestionAndAnswers) => {
 
   let csvContent = '\uFEFF'; // Adding BOM to the beginning
-   csvContent += 'Date,Conversation Id,Agent ID,Agent Name,BU,Form Context ID,Form ID,Form Name,Evaluation ID,Evaluation Status,Evaluator Name,Assignee Name,Evaluator Comments,Agent Review Comments'; // Headers
+   csvContent += 'Date,Conversation Id,Agent ID,Agent Name,BU,Department,Title,Form Context ID,Form ID,Form Name,Assigned Date,Changed Date,Evaluation Status,Evaluator Name,Assignee Name,Evaluator Comments,Agent Review Comments'; // Headers
 
   for(let i=1; i <= maxQuestionAndAnswers ; i++){
     csvContent += `,Question ${i} (Score)`
@@ -185,6 +206,8 @@ let generateCSVFile= async (userAnswersDataList,maxQuestionAndAnswers) => {
     let conversationId = detail.conversationId;
     let userName = detail.userName;
     let name = detail.name;
+    let department = detail.department;
+    let title = detail.title;
     let divisionName = detail.divisionName;
     let evaluationId = detail.evaluationId;
     let evaluationStatus = detail.evaluationStatus;
@@ -196,8 +219,10 @@ let generateCSVFile= async (userAnswersDataList,maxQuestionAndAnswers) => {
     let formModifiedDate = await convertDateFormattToDDMMYYYY(detail.formModifiedDate);
     let comments = detail.comments.replace(/\n/g, " ");
     let agentComments = detail.agentComments.replace(/\n/g, " ");
+    let changedDate = await convertDateFormatToDDMMYYYYHHMMSS(detail.changedDate);
+    let assignedDate = await convertDateFormatToDDMMYYYYHHMMSS(detail.assignedDate);
 
-    csvContent += `${conversationStart},${conversationId},${userName},${name},${divisionName},${formContextId},${formId},${formName},${evaluationId},${evaluationStatus},${evaluatorName},${assigneeName},${comments},${agentComments}`;
+    csvContent += `${conversationStart},${conversationId},${userName},${name},${divisionName},${department},${title},${formContextId},${formId},${formName},${assignedDate},${changedDate},${evaluationStatus},${evaluatorName},${assigneeName},${comments},${agentComments}`;
     
     let questionAndAnswersList = detail.questionAndAnswersList;
     
@@ -309,7 +334,6 @@ let analyzeEvaluationDetail= async (conversationEvaluationDetail) => {
     for(let j =0 ; j < evaluationList.length ; j++){
       evaluationList[j].conversationId  = data.conversationId;
       evaluationList[j].conversationStart   = data.conversationStart ;
-
       evaluationDetailList.push(evaluationList[j]);
     }
     
