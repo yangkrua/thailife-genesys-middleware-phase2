@@ -102,8 +102,8 @@ class GenesysServiceImpl {
             userGenesys.divisionName = objList.entities[i].division.name;
             userGenesys.email = objList.entities[i].email;
             userGenesys.userName = objList.entities[i].username;
-            userGenesys.department  = objList.entities[i].department;
-            userGenesys.title = objList.entities[i].title;
+            userGenesys.department  = objList.entities[i].department === undefined ? "" : objList.entities[i].department;
+            userGenesys.title = objList.entities[i].title === undefined ? "" : objList.entities[i].title;
             
             await userGenesysList.push(userGenesys);
 

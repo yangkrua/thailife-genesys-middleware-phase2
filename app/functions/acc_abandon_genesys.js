@@ -284,7 +284,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
 
                 let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
                 if(uui == ''){
-                  uui = "||||"
+                  //uui = "||||"
                 }
 
                 let countPipe  = await uui.split('|').length - 1;
@@ -324,7 +324,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 }
 
                 if(checkAddList){
-                  if (ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) {
+                  if ((ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) || CX_CALLED != '' ) {
                     checkAddList = true;
                   } else {
                     checkAddList = false;
@@ -377,7 +377,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 
                 //console.log("//////////////");
                 if(dataAbandonList.length >=100  &&  dataAbandonList.length% 100 == 0){
-                  console.log("Wait for 20 seconds Rate limit exceeded the maximum api Genesys");
+                  console.log("Wait for 30 seconds Rate limit exceeded the maximum api Genesys");
                   await delay(30000);
                 }
                 
@@ -392,8 +392,9 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
         });
     }
   }
-  console.log( 'dataAbandonList Size :'+dataAbandonList.length );
-  await log.info(`====== parserAbandonDetail->Done! =======`);
+  console.log( 'acc_in dataAbandonList Size :'+dataAbandonList.length );
+  await log.info( 'acc_in dataAbandonList Size :'+dataAbandonList.length );
+  await log.info(`acc_in ====== parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
 };
 

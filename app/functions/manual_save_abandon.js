@@ -270,7 +270,7 @@ let parserAbandonDetail = async (data) => {
 
                   let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
                   if(uui == ''){
-                    uui = "||||";
+                  //  uui = "||||";
                   }
                   
                   let countPipe  = await uui.split('|').length - 1;
@@ -309,7 +309,7 @@ let parserAbandonDetail = async (data) => {
                   }
 
                   if(checkAddList){
-                    if (ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) {
+                    if ((ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) || CX_CALLED != '' ) {
                       checkAddList = true;
                     } else {
                       checkAddList = false;

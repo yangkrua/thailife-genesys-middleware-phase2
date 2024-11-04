@@ -18,7 +18,7 @@ let environment ='';
 
 let ManualGenAbandon = async (pDateIn,env) => {
   pDate = pDateIn;
-  genAbandon(env);
+  await  genAbandon(env);
 };
 
 let getGetListOfQueues = async () => {
@@ -297,7 +297,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
 
                   let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
                   if(uui == ''){
-                    uui = "||||";
+                   // uui = "||||";
                   }
 
                   let countPipe  = await uui.split('|').length - 1;
@@ -336,7 +336,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   }
 
                   if(checkAddList){
-                    if (ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) {
+                    if ((ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) || CX_CALLED != '' ) {
                       checkAddList = true;
                     } else {
                       checkAddList = false;
@@ -404,8 +404,9 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
           });
     }
   }
-  console.log( 'dataAbandonList Size :'+dataAbandonList.length );
-  await log.info(`====== parserAbandonDetail->Done! =======`);
+  console.log( 'crm dataAbandonList Size :'+dataAbandonList.length );
+  await log.info( 'crm dataAbandonList Size :'+dataAbandonList.length );
+  await log.info(`crm ====== parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
 };
 
