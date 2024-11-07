@@ -1,18 +1,18 @@
 const Client = require("ssh2-sftp-client");
-const sftp = new Client();
-const log = require("./logger.js").LOG;
-const fs = require("node:fs");
+const sftp   = new Client();
+const log    = require("./logger.js").LOG;
+const fs     = require("node:fs");
 
-const path = require("path");
-const moment = require("moment");
-const dbConfig = require('./survey_dbservice.js');
-const config = require("../config/survey_server.js");
+const path           = require("path");
+const moment         = require("moment");
+const dbConfig       = require('./survey_dbservice.js');
+const config         = require("../config/survey_server.js");
 const platformClient = require("purecloud-platform-client-v2");
-const apiInstance = new platformClient.ConversationsApi();
+const apiInstance    = new platformClient.ConversationsApi();
 
-const client = platformClient.ApiClient.instance;
-const CLIENT_ID = config.GENESES.client_id;
-const CLIENT_SECRET = config.GENESES.client_secret;
+const client         = platformClient.ApiClient.instance;
+const CLIENT_ID      = config.GENESES.client_id;
+const CLIENT_SECRET  = config.GENESES.client_secret;
 client.setEnvironment(config.GENESES.org_region);
 
 let pDate = null;
