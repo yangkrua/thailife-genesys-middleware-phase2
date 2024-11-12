@@ -275,7 +275,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
 
                   let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
                   if(uui == ''){
-                   // uui = "||||";
+                    uui = "||||";
                   }
                   
                   let countPipe  = await uui.split('|').length - 1;

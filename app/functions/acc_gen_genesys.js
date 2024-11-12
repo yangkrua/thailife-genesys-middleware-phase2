@@ -154,16 +154,6 @@ let parserCDR_ACC_VOICEMAIL = async (data,dataQueueIdObj) => {
                           let conversationstartTime = await convertData(participant.startTime);
                           let agentcode = await convertData(participant.attributes.AGENT_CODE);
                           
-                          await apiInstance.postConversationDisconnect(ucid)
-                          .then(async (data) => {
-                            console.log(`ACC_VOICEMAIL postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
-                            log.info(`ACC_VOICEMAIL postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
-                          })
-                          .catch(async (err) => {
-                            console.log(`ACC_VOICEMAIL There was a failure calling postConversationDisconnect : ${ucid}`);
-                            console.error(err);
-                          });
-
                           //log.info('ucid : '+ucid);
                          // log.info('customerphoneNumber : '+customerphoneNumber);
                          // log.info('agent Code : '+agentcode);
@@ -316,18 +306,6 @@ let parserCDR_ACC_CALLBACK = async (data,dataQueueIdObj) => {
                           let conversationstartTime = participant.startTime;
                           let agentcode = await convertData(participant.attributes.AGENT_CODE);
                           
-
-                          await apiInstance.postConversationDisconnect(ucid)
-                            .then(async (data) => {
-                              console.log(`ACC_INB_Callback postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
-                              log.info(`ACC_INB_Callback postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
-                            })
-                            .catch(async (err) => {
-                              console.log(`ACC_INB_Callback There was a failure calling postConversationDisconnect : ${ucid}`);
-                              console.error(err);
-                            });
-
-
                          // log.info('ucid : '+ucid);
                          // log.info('customerphoneNumber : '+customerphoneNumber);
                          // log.info('agent Code : '+agentcode);
@@ -609,15 +587,6 @@ let parserCDR_ACC_L_CALLBACK_OUTBOUND = async (data,dataQueueIdObj) => {
                 {
                   let conversationId = item.conversationId;
 
-                  await apiInstance.postConversationDisconnect(conversationId)
-                    .then(async (data) => {
-                      console.log(`ACC_OUTB_Callback postConversationDisconnect success! data: ${conversationId} ,  ${JSON.stringify(data, null, 2)}`);
-                      log.info(`ACC_OUTB_Callback postConversationDisconnect success! data: ${conversationId} ,  ${JSON.stringify(data, null, 2)}`);
-                    })
-                    .catch(async (err) => {
-                      console.log(`ACC_OUTB_Callback There was a failure calling postConversationDisconnect : ${conversationId}`);
-                      console.error(err);
-                    });
                 //ratchawin
                   textCRD += (parserPhoneNumber( item.participants[0].sessions[0].ani.split(":")[1] ) + "|"); //CALLING_PTY
                   textCRD += "P|"; //STATUS
