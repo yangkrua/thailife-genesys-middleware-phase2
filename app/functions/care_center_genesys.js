@@ -533,7 +533,16 @@ let parserCDR_CARE_VOICEMAIL = async (data,dataQueueIdObj) => {
                           let conversationstartTime = await convertData(participant.startTime);
                           let policyNumber = await convertData(participant.attributes.POLICY_NUMBER);
                           
-                        
+                          await apiInstance.postConversationDisconnect(ucid)
+                          .then(async (data) => {
+                            console.log(`CARE_VOICEMAIL postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                            log.info(`CARE_VOICEMAIL postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                          })
+                          .catch(async (err) => {
+                            console.log(`CARE_VOICEMAIL There was a failure calling postConversationDisconnect : ${ucid}`);
+                            console.error(err);
+                          });
+
                           //log.info('ucid : '+ucid);
                           //log.info('customerphoneNumber : '+customerphoneNumber);
                           //log.info('policyNumber : '+policyNumber);
@@ -950,6 +959,16 @@ let parserCDR_CARE_CALLBACK = async (data,dataQueueIdObj) => {
                           let conversationstartTime = await convertData(participant.startTime);
                           let policyNumber = await convertData(participant.attributes.POLICY_NUMBER);
                           
+
+                          await apiInstance.postConversationDisconnect(ucid)
+                          .then(async (data) => {
+                            console.log(`CC_Callback postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                            log.info(`CC_Callback postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                          })
+                          .catch(async (err) => {
+                            console.log(`CC_Callback There was a failure calling postConversationDisconnect : ${ucid}`);
+                            console.error(err);
+                          });
 
                           //log.info('ucid : '+ucid);
                           //log.info('customerphoneNumber : '+customerphoneNumber);
