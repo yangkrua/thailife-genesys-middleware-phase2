@@ -326,8 +326,8 @@ let parserCDR_ACC_CALLBACK = async (data, dataQueueIdObj) => {
           }
         })
         .catch(async (err) => {
-          console.log("There was a failure calling getConversationsCall");
-          console.error(err);
+          log.error(`There was a failure calling getConversationsCall, ${err}`);
+          
         });
     }
   }
@@ -346,8 +346,8 @@ let GenAbandonOutbound = async () => {
         let dataTableId = await dataTableObj.entities[0].id;
 
         let dataQueueIdObj = await ACC_OUT_ABANDON_GetQueueIdInDataTableByID(dataTableId);
-        console.log("dataTableId : " + dataTableId);
-        console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+        log.info(`dataTableId : ${dataTableId} `);
+        log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
         await ACC_L_ABANDON_OUTBOUND(dataQueueIdObj);
 
@@ -372,8 +372,8 @@ let GenCallBackOutbound = async () => {
         let dataTableId = await dataTableObj.entities[0].id;
 
         let dataQueueIdObj = await ACC_CALLBACK_GetQueueIdInDataTableByID(dataTableId);
-        console.log("dataTableId : " + dataTableId);
-        console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+        log.info(`dataTableId : ${dataTableId} `);
+        log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
         await ACC_L_CALLBACK_OUTBOUND(dataQueueIdObj);
 
@@ -426,12 +426,12 @@ let ACC_L_ABANDON_OUTBOUND = async (dataQueueIdObj) => {
     order: "asc",
   };
 
-  // log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+  log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
   pageTotal = 2;
   dataResult;
 
   dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-  // log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+  log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
 
   if (
     (await dataResult) !== undefined &&
@@ -443,7 +443,8 @@ let ACC_L_ABANDON_OUTBOUND = async (dataQueueIdObj) => {
     for (let i = 1; i < pageTotal; i++) {
       body.paging.pageNumber = i + 1;
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      // `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+      log.info(`API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+      
       Array.prototype.push.apply(
         conversationObj.conversations,
         dataResult.conversations
@@ -590,12 +591,10 @@ let parserCDR_ACC_L_CALLBACK_OUTBOUND = async (data, dataQueueIdObj) => {
 
                 await apiInstance.postConversationDisconnect(conversationId)
                   .then(async (data) => {
-                    console.log(`ACC_OUTB_Callback postConversationDisconnect success! data: ${conversationId} ,  ${JSON.stringify(data, null, 2)}`);
                     log.info(`ACC_OUTB_Callback postConversationDisconnect success! data: ${conversationId} ,  ${JSON.stringify(data, null, 2)}`);
                   })
                   .catch(async (err) => {
-                    console.log(`ACC_OUTB_Callback There was a failure calling postConversationDisconnect : ${conversationId}`);
-                    console.error(err);
+                    log.error(`ACC_OUTB_Callback There was a failure calling postConversationDisconnect : ${conversationId}, ${err}`);
                   });
                 //ratchawin
                 textCRD += (parserPhoneNumber(item.participants[0].sessions[0].ani.split(":")[1]) + "|"); //CALLING_PTY
@@ -616,8 +615,7 @@ let parserCDR_ACC_L_CALLBACK_OUTBOUND = async (data, dataQueueIdObj) => {
           }
         })
         .catch(async (err) => {
-          console.log("There was a failure calling getConversationsCall");
-          console.error(err);
+          log.error(`There was a failure calling getConversationsCall, ${err}`);
         });
 
 
@@ -700,8 +698,7 @@ let getDataTableByName = async (name) => {
       dataTableObj = await data;
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatables");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatables , ${err}`);
     });
 
 
@@ -728,7 +725,8 @@ let CallbackGetQueueIdInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -759,8 +757,7 @@ let CallbackGetQueueIdInDataTableByID = async (id) => {
       }
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows,  ${err} `);
     });
 
   return dataQueueIdObj;
@@ -785,7 +782,8 @@ let VoicemailGetQueueIdInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -816,8 +814,7 @@ let VoicemailGetQueueIdInDataTableByID = async (id) => {
       }
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
     });
 
   return dataQueueIdObj;
@@ -842,7 +839,7 @@ let GetQueueIdInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -873,8 +870,8 @@ let GetQueueIdInDataTableByID = async (id) => {
       }
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
+      
     });
 
   return dataQueueIdObj;
@@ -900,7 +897,7 @@ let ACC_OUT_ABANDON_GetQueueIdInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -931,8 +928,8 @@ let ACC_OUT_ABANDON_GetQueueIdInDataTableByID = async (id) => {
       }
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
+      
     });
 
   return dataQueueIdObj;
@@ -958,7 +955,7 @@ let ACC_CALLBACK_GetQueueIdInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -989,8 +986,8 @@ let ACC_CALLBACK_GetQueueIdInDataTableByID = async (id) => {
       }
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
+      
     });
 
   return dataQueueIdObj;

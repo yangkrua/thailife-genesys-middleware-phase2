@@ -55,8 +55,8 @@ let getGetListOfQueues = async () => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getGetListOfQueues");
-      console.error(err);
+      log.error(`There was a failure calling getGetListOfQueues , ${err}`);
+      
     });
 
   return listOfQueues;
@@ -89,8 +89,8 @@ let genAbandon = async (env) => {
           }
         }
         
-        console.log("dataTableId : " + dataTableId);
-        console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+        log.info("dataTableId : " + dataTableId);
+        log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
         await analyticsAbandonConversationsDetailsAndGenFile(dataQueueIdObj);
 
@@ -113,8 +113,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     pDateStop = moment(pDate + "T23:59:59.000");
   }
 
-  console.log("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-  console.log("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
 
   let pageTotal = 2;
   let dataResult;
@@ -144,12 +144,12 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     order: "asc",
   };
 
-  // log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+  log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
   pageTotal = 2;
   dataResult;
 
   dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-  // log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+  log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
 
   if (
     (await dataResult) !== undefined &&
@@ -161,7 +161,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     for (let i = 1; i < pageTotal; i++) {
       body.paging.pageNumber = i + 1;
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+      
       Array.prototype.push.apply(
         conversationObj.conversations,
         dataResult.conversations
@@ -171,8 +172,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     let dataAbandonList = await parserAbandonDetail(conversationObj, dataQueueIdObj);
     if (await dataAbandonList.length > 0) {
        
-        await saveAbandonCallToSalesforce(dataAbandonList);
-      // await ftpFileCDR(localPath);
+      await saveAbandonCallToSalesforce(dataAbandonList);
+      
     }
   }
 };
@@ -185,7 +186,7 @@ let saveAbandonCallToSalesforce = async (dataAbandonList) => {
 
 
 let parserAbandonDetail = async (data, dataQueueIdObj) => {
-  //await log.info( `======***parserAbandonDetail***, Raw-Data= ${JSON.stringify(data)}` );
+  
   await log.info(`====== parserAbandonDetail->Begin =======`);
 
   const dataAbandonList = [];
@@ -285,12 +286,12 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   let countPipe  = await uui.split('|').length - 1;
                   let checkAddList = true;
 
-                  let ANI_NUMBER = participant.attributes["ANI_NUMBER"] === undefined ? "" : participant.attributes["ANI_NUMBER"];
-                  let DNIS_NUMBER = participant.attributes["DNIS_NUMBER"] === undefined ? "" : participant.attributes["DNIS_NUMBER"];
-                  let IVR_DNIS = participant.attributes["IVR_DNIS"] === undefined ? "" : participant.attributes["IVR_DNIS"];
+                  let ANI_NUMBER = await participant.attributes["ANI_NUMBER"] === undefined ? "" : participant.attributes["ANI_NUMBER"];
+                  let DNIS_NUMBER = await participant.attributes["DNIS_NUMBER"] === undefined ? "" : participant.attributes["DNIS_NUMBER"];
+                  let IVR_DNIS = await participant.attributes["IVR_DNIS"] === undefined ? "" : participant.attributes["IVR_DNIS"];
                   
-                  let CX_CALLED = participant.attributes["CX_CALLED"] === undefined ? "" : participant.attributes["CX_CALLED"];
-                  let transfer_InternalVDN = participant.attributes["transfer_InternalVDN"] === undefined ? "" : participant.attributes["transfer_InternalVDN"];
+                  let CX_CALLED = await participant.attributes["CX_CALLED"] === undefined ? "" : participant.attributes["CX_CALLED"];
+                  let transfer_InternalVDN = await participant.attributes["transfer_InternalVDN"] === undefined ? "" : participant.attributes["transfer_InternalVDN"];
                   transfer_InternalVDN = await transfer_InternalVDN.replace('+', '');
                   
                   ANI_NUMBER = await parserTelPhoneNumber(ANI_NUMBER);
@@ -365,11 +366,11 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                       Opened_Date_Time : conversationStart,
                       GenesysUser : userName //'agentAppTest'
                   });
-                  //console.log(dataAbandonList.length +' Conversation_Id :' + conversationId +' ,SEGSTOP :'+SEGSTOP);
+                  
                 }
-                 //console.log("//////////////");
                  
-                  //console.log("//////////////");
+                 
+                  
                   if(dataAbandonList.length >=100  &&  dataAbandonList.length% 100 == 0){
                     console.log("Wait for 20 seconds Rate limit exceeded the maximum api Genesys");
                     await delay(30000);
@@ -386,7 +387,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
           });
     }
   }
-  console.log( 'pos dataAbandonList Size :'+dataAbandonList.length );
+  
   await log.info('pos dataAbandonList Size :'+dataAbandonList.length );
   await log.info(`pos ====== parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
@@ -477,7 +478,7 @@ let getRowDataInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -498,8 +499,8 @@ let getRowDataInDataTableByID = async (id) => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows , ${err}`);
+      
     });
 
   return rowDataObj;
@@ -526,8 +527,8 @@ let getDataTableByName = async (name) => {
       dataTableObj = await data;
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatables");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatables , ${err}`);
+      
     }
     );
 

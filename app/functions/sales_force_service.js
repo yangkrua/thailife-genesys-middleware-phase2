@@ -29,7 +29,7 @@ let getAccessTokenSalesforce = async (urlGetToken) => {
         });
         return response.data.access_token;
     } catch (error) {
-        console.error('Error getting access token:', error.response ? error.response.data : error.message);
+        log.error(`Error getting access token: ${error.response ? error.response.data : error.message} `);
         throw error;
     }
   }
@@ -42,10 +42,10 @@ let getAccessTokenSalesforce = async (urlGetToken) => {
               method: "get",
               url: urlGetToken,
           }).then(async (response) => {
-              console.log(response.data);
+              log.info(response.data);
               resolve(JSON.stringify(response.data.responseRecord.accessToken))
           }).catch(async (error) => {
-              console.log(error);
+              log.error(`getAccessTokenSalesforceTLF(), error: ${error}`);
               resolve(error)
           })
       } catch (err) {
@@ -104,8 +104,8 @@ let getAccessTokenSalesforce = async (urlGetToken) => {
 
           const dataAbandonList = [];
           dataAbandonList.push(dataList[i]);
-          console.log( (i+1) +' Conversation_Id :' + dataList[i].Conversation_Id );
-          await log.info( (i+1) +' Conversation_Id :' + dataList[i].Conversation_Id );
+          log.info(` ${i+1} + Conversation_Id :  ${dataList[i].Conversation_Id} `);
+          
           try {
             const response = await axios.post(fullURL, {
                 dataList: dataAbandonList // Set the array list to dataList
@@ -115,13 +115,15 @@ let getAccessTokenSalesforce = async (urlGetToken) => {
                     'Content-Type': 'application/json'
                 }
             });
-            await log.info('saveAbandonCall response statusCode: ' + response.data.statusCode);
-            console.log('saveAbandonCall response statusCode:', response.data.statusCode);
-            console.log('saveAbandonCall response statusMessage:', response.data.statusMessage);
-            console.log('saveAbandonCall response message:', response.data.message);
+
+            await log.info(`saveAbandonCall response statusCode: ${response.data.statusCode} `);
+            await log.info(`saveAbandonCall response statusCode: ${response.data.statusCode} `);
+            await log.info(`saveAbandonCall response statusMessage: ${response.data.statusMessage} `);
+            await log.info(`saveAbandonCall response message: ${response.data.message} `);
+
           } catch (error) {
 
-              console.log('Request payload:', {
+              log.error('Request payload:', {
               dataList: dataAbandonList // Log the request data
             });
 
@@ -129,24 +131,24 @@ let getAccessTokenSalesforce = async (urlGetToken) => {
               // The request was made, and the server responded with a status code
               // that falls out of the range of 2xx
 
-              console.log('saveAbandonCall Error data:', error.response.data);
-              console.log('saveAbandonCall Error status:', error.response.status);
-              console.log('saveAbandonCall Error headers:', error.response.headers);
+              log.error(`saveAbandonCall Error data: ${error.response.data} `);
+              log.error(`saveAbandonCall Error status:' ${error.response.status} `);
+              log.error(`saveAbandonCall Error headers: ${error.response.headers} `);
 
               await log.error('saveAbandonCall Error data: ' +  JSON.stringify(error.response.data));
               await log.error('saveAbandonCall Error status: ' +  error.response.status);
               await log.error('saveAbandonCall Error headers: '+  error.response.headers);
+
             } else if (error.request) {
-              // The request was made, but no response was received
-              console.log('saveAbandonCall Error request:', error.request);
+
+              // The request was made, but no response was received              
               await log.error('saveAbandonCall Error request: ' + error.request);
             } else {
-              // Something happened in setting up the request that triggered an Error
-              console.log('saveAbandonCall Error message:', error.message);
+              // Something happened in setting up the request that triggered an Error              
               await log.error('saveAbandonCall Error message: ' + error.message);
             }
             await log.error('saveAbandonCall Error config: ' + error.config);
-            console.log('saveAbandonCall Error config:', error.config);
+            
           }
 
           await delay(2000);
@@ -154,9 +156,9 @@ let getAccessTokenSalesforce = async (urlGetToken) => {
         }
 
     } catch (error) {
-        console.error('Error calling AbandonCall API:', error.response ? error.response.data : error.message);
-        let response = error.response ? error.response.data : error.message;
-        await log.info('Error calling AbandonCall API: ' + response);
+        log.error('Error calling AbandonCall API:', error.response ? error.response.data : error.message);
+        let response = await error.response ? error.response.data : error.message;
+        await log.error('Error calling AbandonCall API: ' + response);
         throw error;
     }
 

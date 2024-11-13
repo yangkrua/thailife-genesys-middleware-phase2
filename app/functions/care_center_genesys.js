@@ -152,12 +152,12 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     order: "asc",
   };
 
-  // log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+  log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
   pageTotal = 2;
   dataResult;
 
   dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-  // log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+  log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
 
   if (
     (await dataResult) !== undefined &&
@@ -169,7 +169,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     for (let i = 1; i < pageTotal; i++) {
       body.paging.pageNumber = i + 1;
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+      
       Array.prototype.push.apply(
         conversationObj.conversations,
         dataResult.conversations
@@ -193,7 +194,6 @@ let saveAbandonCallToSalesforce = async (dataAbandonList) => {
 
 
 let parserAbandonDetail = async (data, dataQueueIdObj) => {
-  //await log.info( `======***parserAbandonDetail***, Raw-Data= ${JSON.stringify(data)}` );
   await log.info(`====== parserAbandonDetail->Begin =======`);
 
 
@@ -243,8 +243,8 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                     userName = email.substring(0, email.indexOf('@'));
                   })
                   .catch(async (err) => {
-                    console.log("There was a failure calling getUser");
-                    console.error(err);
+                    log.error(`There was a failure calling getUser , ${err}`);
+                    
                   });
 
                   let SEGSTART = await moment(item.conversationStart) ; //SEGSTART
@@ -374,8 +374,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   });
                   //console.log(dataAbandonList.length +' Conversation_Id :' + conversationId +' ,SEGSTOP :'+SEGSTOP);
                 }
-                 //console.log("//////////////");
-                 
+                                  
                   //console.log("//////////////");
                   if(dataAbandonList.length >=100  &&  dataAbandonList.length% 100 == 0){
                     console.log("Wait for 20 seconds Rate limit exceeded the maximum api Genesys");
@@ -388,12 +387,12 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
             }
           })
           .catch(async (err) => {
-            console.log("There was a failure calling getConversationsCall");
-            console.error(err);
+            log.error(`There was a failure calling getConversationsCall , ${err}`);
+            
           });
     }
   }
-  console.log( 'cc dataAbandonList Size :'+dataAbandonList.length );
+  
   await log.info( 'cc dataAbandonList Size :'+dataAbandonList.length );
   await log.info(`cc ====== parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
@@ -403,15 +402,15 @@ let Gen_CARE_VOICEMAIL = async () => {
   await client
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
-      console.log("loginClientCredentialsGrant : ");
+      log.info("loginClientCredentialsGrant : ");
 
   let dataTableObj = await getDataTableByName(config.GENESES.DATA_TABLE_NAME.NAME_CC);
   if(await dataTableObj.total > 0){
     let dataTableId = await dataTableObj.entities[0].id;
     
     let dataQueueIdObj = await VoicemailGetQueueIdInDataTableByID(dataTableId);
-    console.log("dataTableId : "+dataTableId);
-    console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+    log.info("dataTableId : "+dataTableId);
+    log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
     await CARE_VOICEMAIL(dataQueueIdObj);
 
@@ -461,12 +460,12 @@ let CARE_VOICEMAIL = async (dataQueueIdObj) => {
         order: "asc",
       };
 
-      //log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
       pageTotal = 2;
       dataResult;
 
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
 
       if (
         (await dataResult) !== undefined &&
@@ -478,7 +477,8 @@ let CARE_VOICEMAIL = async (dataQueueIdObj) => {
         for (let i = 1; i < pageTotal; i++) {
           body.paging.pageNumber = i + 1;
           dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-          //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+          log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+          
           Array.prototype.push.apply(
             conversationObj.conversations,
             dataResult.conversations
@@ -488,8 +488,7 @@ let CARE_VOICEMAIL = async (dataQueueIdObj) => {
         let lineCDR = await parserCDR_CARE_VOICEMAIL(conversationObj,dataQueueIdObj);
         if (await lineCDR.length > 0) {
           await dbservice.insertIvrCareVoicemail(lineCDR.split("\n"));
-          // const localPath = await `${config.GENESES.data_process_inbox}/CARE_VOICEMAIL_${moment().format("YYYYMMDD_HHMMSS")}.txt`;
-          // await writeFile(localPath, lineCDR);
+          
         }
       }
 };
@@ -535,21 +534,16 @@ let parserCDR_CARE_VOICEMAIL = async (data,dataQueueIdObj) => {
                           
                           await apiInstance.postConversationDisconnect(ucid)
                           .then(async (data) => {
-                            console.log(`CARE_VOICEMAIL postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
                             log.info(`CARE_VOICEMAIL postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                            
                           })
                           .catch(async (err) => {
-                            console.log(`CARE_VOICEMAIL There was a failure calling postConversationDisconnect : ${ucid}`);
-                            console.error(err);
+                            log.error(`CARE_VOICEMAIL There was a failure calling postConversationDisconnect : ${ucid}, ${err}`);
+                            
                           });
 
                           //log.info('ucid : '+ucid);
-                          //log.info('customerphoneNumber : '+customerphoneNumber);
-                          //log.info('policyNumber : '+policyNumber);
-                          //log.info('conversation startTime : '+conversationstartTime);
-                          //log.info('////////////');
-                          //log.info('message id : '+message_id);
-
+                     
                           textCRD += await (ucid + "|"); //UCID
                           textCRD += await (customerphoneNumber + "|"); //Customer
                           textCRD += await (moment(conversationstartTime).format("YYYY-MM-DD HH:mm:ss") + "|"); //SEGSTART
@@ -563,8 +557,8 @@ let parserCDR_CARE_VOICEMAIL = async (data,dataQueueIdObj) => {
                   }
                 })
                 .catch(async (err) => {
-                  console.log("There was a failure calling getConversationsCall");
-                  console.error(err);
+                  log.error(`There was a failure calling getConversationsCall , ${err}`);
+                  
                 });    
     }
   }
@@ -593,7 +587,7 @@ let ivrMenuLogGetQueueIdInDataTableByID = async (id) => {
     // Returns the rows for the datatable with the given id
     await apiInstance.getFlowsDatatableRows(datatableId, opts)
       .then(async (dataResult) => {
-        //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+        log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
         if (
           (await dataResult) !== undefined &&
           (await dataResult.total) > 0
@@ -623,8 +617,8 @@ let ivrMenuLogGetQueueIdInDataTableByID = async (id) => {
         }
       })
       .catch((err) => {
-        console.log("There was a failure calling getFlowsDatatableRows");
-        console.error(err);
+        log.error(`There was a failure calling getFlowsDatatableRows , ${err}` );
+        
       });
 
   return  dataQueueIdObj;
@@ -634,7 +628,7 @@ let ivrMenuLogGetQueueIdInDataTableByID = async (id) => {
 
 let Gen_IVR_Log = async () => {
 
-  await console.log("Start Process Gen_IVR_Log "+await new Date() );
+  await log.info(`Start Process Gen_IVR_Log:  ${new Date()} `);
 
     await client
       .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
@@ -658,7 +652,7 @@ let Gen_IVR_Log = async () => {
     });
       
 
-await console.log("End Process Gen_IVR_Log "+await new Date() );
+await log.info(`End Process Gen_IVR_Log : ${new Date()} `);
 
 };
 
@@ -697,12 +691,12 @@ let Get_IVR_Log = async (dataQueueIdObj) => {
         order: "asc",
       };
 
-      // log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
       pageTotal = 2;
       dataResult;
 
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      // log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
 
       if (
         (await dataResult) !== undefined &&
@@ -714,7 +708,8 @@ let Get_IVR_Log = async (dataQueueIdObj) => {
         for (let i = 1; i < pageTotal; i++) {
           body.paging.pageNumber = i + 1;
           dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-          //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+          log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+          
           Array.prototype.push.apply(
             conversationObj.conversations,
             dataResult.conversations
@@ -751,7 +746,7 @@ let checkFlowIvrLogInDataTable = async (data_participants, dataQueueIdObj) => {
 };
 
 let parserCDR_IVR_Log = async (data,dataQueueIdObj) => {
-  // log.info( `======***parserCDR_BY_Queue_LIST***, Raw-Data= ${JSON.stringify(data)}` );
+  
   log.info(`====== parserCDR_IVR_Log->Begin =======`);
   let textCRD = '';
   for (const item of data.conversations) {    
@@ -773,7 +768,7 @@ let parserCDR_IVR_Log = async (data,dataQueueIdObj) => {
 
             let participant = await data.participants[index_p];
 
-            //log.info( `API->postAnalyticsConversationsDetailsQuery(), Result: ${JSON.stringify(data)}` );
+            
             if (
               (await participant) !== undefined &&
               (await participant.attributes)  !== undefined &&
@@ -796,11 +791,11 @@ let parserCDR_IVR_Log = async (data,dataQueueIdObj) => {
                         let sequence = await(indexMenu+1);
   
                         // สร้าง Date object จากสตริงวันที่
-                        let date = new Date(start_time);
+                        let date = await new Date(start_time);
                         if (isValidDate(date)) {
                           // ดึงค่าต่าง ๆ ของวันที่
 
-                          start_time = date.toISOString().replace('T', ' ').replace('Z', '');
+                          start_time = await date.toISOString().replace('T', ' ').replace('Z', '');
 
                           textCRD += await (ucid + "|"); //UCID
                           textCRD += await (menucode + "|"); //MENUCODE
@@ -820,8 +815,8 @@ let parserCDR_IVR_Log = async (data,dataQueueIdObj) => {
         }
       })
       .catch(async (err) => {
-        console.log("There was a failure calling getConversationsCall");
-        console.error(err);
+        log.error(`There was a failure calling getConversationsCall, ${err} `);
+        
       }); 
 
     }
@@ -839,15 +834,15 @@ let Gen_CARE_CALLBACK = async () => {
   await client
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
-      console.log("loginClientCredentialsGrant : ");
+      log.info("loginClientCredentialsGrant : ");
       
   let dataTableObj = await getDataTableByName(config.GENESES.DATA_TABLE_NAME.NAME_CC);
   if(await dataTableObj.total > 0){
     let dataTableId = await dataTableObj.entities[0].id;
     
     let dataQueueIdObj = await CallbackGetQueueIdInDataTableByID(dataTableId);
-    console.log("dataTableId : "+dataTableId);
-    console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+    log.info("dataTableId : "+dataTableId);
+    log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
     await CARE_CALLBACK(dataQueueIdObj);
 
@@ -899,12 +894,12 @@ let CARE_CALLBACK = async (dataQueueIdObj) => {
         order: "asc",
       };
 
-      // log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
       pageTotal = 2;
       dataResult;
 
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      // log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
 
       if (
         (await dataResult) !== undefined &&
@@ -916,7 +911,7 @@ let CARE_CALLBACK = async (dataQueueIdObj) => {
         for (let i = 1; i < pageTotal; i++) {
           body.paging.pageNumber = i + 1;
           dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-          //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+          log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
           Array.prototype.push.apply(
             conversationObj.conversations,
             dataResult.conversations
@@ -926,14 +921,13 @@ let CARE_CALLBACK = async (dataQueueIdObj) => {
         let lineCDR = await parserCDR_CARE_CALLBACK(conversationObj,dataQueueIdObj);
         if (await lineCDR.length > 0) {
           await dbservice.insertIvrCareCallback(lineCDR.split("\n"));
-          // const localPath = await `${config.GENESES.data_process_inbox}/CARE_CALLBACK_${moment().format("YYYYMMDD_HHMMSS")}.txt`;
-          // await writeFile(localPath, lineCDR);
+          
         }
       }
 };
 
 let parserCDR_CARE_CALLBACK = async (data,dataQueueIdObj) => {
-  // log.info( `======***parserCDR_BY_Queue_LIST***, Raw-Data= ${JSON.stringify(data)}` );
+  
   log.info(`====== parserCDR_CARE_CALLBACK->Begin =======`);
   let textCRD = '';
   for (const item of data.conversations) {    
@@ -961,20 +955,15 @@ let parserCDR_CARE_CALLBACK = async (data,dataQueueIdObj) => {
                           
 
                           await apiInstance.postConversationDisconnect(ucid)
-                          .then(async (data) => {
-                            console.log(`CC_Callback postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
+                          .then(async (data) => {                            
                             log.info(`CC_Callback postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
                           })
                           .catch(async (err) => {
-                            console.log(`CC_Callback There was a failure calling postConversationDisconnect : ${ucid}`);
-                            console.error(err);
+                            log.error(`CC_Callback There was a failure calling postConversationDisconnect : ${ucid}, ${err}`);
+                            
                           });
 
-                          //log.info('ucid : '+ucid);
-                          //log.info('customerphoneNumber : '+customerphoneNumber);
-                          //log.info('policyNumber : '+policyNumber);
-                          //log.info('conversation startTime : '+conversationstartTime);
-                          //log.info('////////////');
+                          //log.info('ucid : '+ucid);                          
 
                           textCRD += await (ucid + "|"); //UCID
                           textCRD += await (customerphoneNumber + "|"); //Customer
@@ -988,8 +977,8 @@ let parserCDR_CARE_CALLBACK = async (data,dataQueueIdObj) => {
                   }
                 })
                 .catch(async (err) => {
-                  console.log("There was a failure calling getConversationsCall");
-                  console.error(err);
+                  log.error(`There was a failure calling getConversationsCall , ${err}`);
+                  
                 });    
     }
   }
@@ -1050,8 +1039,8 @@ let CallbackGetQueueIdInDataTableByID = async (id) => {
         }
       })
       .catch((err) => {
-        console.log("There was a failure calling getFlowsDatatableRows");
-        console.error(err);
+        log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
+        
       });
 
    })
@@ -1085,7 +1074,7 @@ let VoicemailGetQueueIdInDataTableByID = async (id) => {
     // Returns the rows for the datatable with the given id
     await apiInstance.getFlowsDatatableRows(datatableId, opts)
       .then(async (dataResult) => {
-        //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+        log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
         if (
           (await dataResult) !== undefined &&
           (await dataResult.total) > 0
@@ -1116,8 +1105,8 @@ let VoicemailGetQueueIdInDataTableByID = async (id) => {
         }
       })
       .catch((err) => {
-        console.log("There was a failure calling getFlowsDatatableRows");
-        console.error(err);
+        log.error(`There was a failure calling getFlowsDatatableRows , ${err}`);
+        
       });
 
    })
@@ -1176,8 +1165,8 @@ let tNotResoinding = async (data_participants) => {
       for (const obj of item.sessions[0].metrics) {
         if ((await obj.name) === "tNotResponding") {
           let data = {};
-          data.emitDate = obj.emitDate;
-          data.userId = item.userId;
+          data.emitDate = await obj.emitDate;
+          data.userId = await item.userId;
           await tNotResoindingList.push(data);
         }
       }
@@ -1228,7 +1217,7 @@ let getInfomationQueueAbandon = async (dataTableObj) => {
     ) {
       var queueId = await dataTableObj.entities[i].QUEUE_ID;
       var queueName = await dataTableObj.entities[i].QUEUE_NAME; 
-      dataQueueIdObj[queueId] = queueName;
+      dataQueueIdObj[queueId] = await queueName;
     }
   }
   return dataQueueIdObj;
@@ -1254,7 +1243,7 @@ let getRowDataInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -1275,8 +1264,8 @@ let getRowDataInDataTableByID = async (id) => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows , ${err}`);
+      
     });
 
   return rowDataObj;
@@ -1303,8 +1292,8 @@ let getDataTableByName = async (name) => {
       dataTableObj = await data;
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatables");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatables , ${err}`);
+      
     }
     );
 

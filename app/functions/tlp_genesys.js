@@ -32,8 +32,8 @@ let Gen_VOICEMAIL = async () => {
       let dataTableId = await dataTableObj.entities[0].id;
       
       let dataQueueIdObj = await VoicemailGetQueueIdInDataTableByID(dataTableId);
-      console.log("dataTableId : "+dataTableId);
-      console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+      log.info(`dataTableId : ${dataTableId} `);
+      log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
       await VOICEMAIL(dataQueueIdObj);
 
@@ -84,12 +84,12 @@ let VOICEMAIL = async (dataQueueIdObj) => {
         order: "asc",
       };
 
-     // log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
       pageTotal = 2;
       dataResult;
 
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+      log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
 
       if (
         (await dataResult) !== undefined &&
@@ -101,7 +101,7 @@ let VOICEMAIL = async (dataQueueIdObj) => {
         for (let i = 1; i < pageTotal; i++) {
           body.paging.pageNumber = i + 1;
           dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-          //log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
+          log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
           Array.prototype.push.apply(
             conversationObj.conversations,
             dataResult.conversations
@@ -116,7 +116,7 @@ let VOICEMAIL = async (dataQueueIdObj) => {
 };
 
 let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
- // log.info( `======***parserCDR_BY_Queue_LIST***, Raw-Data= ${JSON.stringify(data)}` );
+ 
   log.info(`====== TLP parserCDR_VOICEMAIL->Begin =======`);
 
   let textCRD = '';
@@ -142,7 +142,7 @@ let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
                   ) {
                     for(let index_p = 0 ;index_p < data.participants.length ; index_p++){
                       let participant = await data.participants[index_p];
-                      // log.info( `API->postAnalyticsConversationsDetailsQuery(), Result: ${JSON.stringify(data)}` );
+                      
                       if (
                         (await participant) !== undefined &&
                         (await participant.attributes)  !== undefined &&
@@ -159,8 +159,8 @@ let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
                               log.info(`TLP_Voicemail postConversationDisconnect success! data: ${ucid} ,  ${JSON.stringify(data, null, 2)}`);
                             })
                             .catch(async (err) => {
-                              console.log(`TLP_Voicemail There was a failure calling postConversationDisconnect : ${ucid}`);
-                              console.error(err);
+                              log.error(`TLP_Voicemail There was a failure calling postConversationDisconnect : ${ucid}, error: ${err}`);
+                              
                             });
 
                           textCRD += await (ucid + "|"); //UCID
@@ -176,12 +176,12 @@ let parserCDR_VOICEMAIL = async (data,dataQueueIdObj) => {
                   }
                 })
                 .catch(async (err) => {
-                  console.log("There was a failure calling getConversationsCall");
-                  console.error(err);
+                  log.error(`There was a failure calling getConversationsCall , ${err}`);
+                  
                 });    
     }
   }
-  console.log("====== TLP parserCDR_VOICEMAIL->Done! =======");
+  
   log.info(`====== TLP parserCDR_VOICEMAIL->Done! =======`);
   return textCRD;
 };
@@ -209,13 +209,13 @@ let VoicemailGetQueueIdInDataTableByID = async (id) => {
     // Returns the rows for the datatable with the given id
     await apiInstance.getFlowsDatatableRows(datatableId, opts)
       .then(async (dataResult) => {
-        //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+        log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
         if (
           (await dataResult) !== undefined &&
           (await dataResult.total) > 0
         ) {
           dataTableObj = await dataResult;
-          pageTotal = Math.ceil(dataResult.total / 100);
+          pageTotal = await Math.ceil(dataResult.total / 100);
   
           for (let i = 1; i < pageTotal; i++) {
             opts.pageNumber = i+1;
@@ -240,8 +240,8 @@ let VoicemailGetQueueIdInDataTableByID = async (id) => {
         }
       })
       .catch((err) => {
-        console.log("There was a failure calling getFlowsDatatableRows");
-        console.error(err);
+        log.error(`There was a failure calling getFlowsDatatableRows , ${err}` );
+        
       });
 
    })
@@ -296,8 +296,8 @@ let getDataTableByName = async (name) => {
       dataTableObj = await data;
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatables");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatables , ${err}`);
+      
     }
     );
 

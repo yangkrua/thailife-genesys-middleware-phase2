@@ -26,25 +26,25 @@ let getEvaluationInfomation = async () => {
 
   await genesysService.loginGenesys();
 
-  await console.log("Start Process getListUsers :"+await new Date() );
+  await log.info(`Start Process getListUsers : ${await new Date()} `);
   const userGenesysList = await genesysService.getListUsers();
   
-  await console.log("Start Process getPublishedFormsEvaluations :"+await new Date() );
+  await log.info(`Start Process getPublishedFormsEvaluations : ${await new Date()} `);
   const publishedFormsEvaluations = await genesysService.getPublishedFormsEvaluations();
 
-  await console.log("Start Process getListEvaluationFormGenesys :"+await new Date() );
+  await log.info(`Start Process getListEvaluationFormGenesys : ${await new Date()} `);
   const formEvaluationGenesysList = await genesysService.getListEvaluationFormGenesys();
 
-  await console.log("Start Process filterDuplicateFormEvaluation :"+await new Date() );
+  await log.info(`Start Process filterDuplicateFormEvaluation : ${await new Date()} `);
   const allFormEvaluationGenesysList = await filterDuplicateFormEvaluation(publishedFormsEvaluations,formEvaluationGenesysList);
 
-  await console.log("Start Process initFormQuestionDetail :"+await new Date() );
+  await log.info(`Start Process initFormQuestionDetail : ${await new Date()} `);
   const evaluationFormDetailGenesysList = await initFormQuestionDetail(allFormEvaluationGenesysList);
 
-  await console.log("Start Process getConversationEvaluationDetail :"+await new Date() );
+  await log.info(`Start Process getConversationEvaluationDetail : ${await new Date()} `);
   const conversationEvaluationDetail = await getConversationEvaluationDetail();
 
-  await console.log("Start Process analyzeEvaluationDetail :"+await new Date() );
+  await log.info(`Start Process analyzeEvaluationDetail : ${await new Date()} `);
   const evaluationDetailList = await analyzeEvaluationDetail(conversationEvaluationDetail); 
 
   const userAnswersDataList= [];
@@ -138,9 +138,9 @@ let getEvaluationInfomation = async () => {
           dataFinal.assignedDate = assignedDate;
           userAnswersDataList.push(dataFinal);
 
-          console.log("conversationId : " + conversationId);
-          console.log("evaluationId : " + evaluationId);
-          console.log("------------------------ ");
+          log.info("conversationId : " + conversationId);
+          log.info("evaluationId : " + evaluationId);
+          log.info("------------------------ ");
         }
 
         await log.info("End ");
@@ -256,9 +256,9 @@ let generateCSVFile= async (userAnswersDataList,maxQuestionAndAnswers) => {
   // Write the CSV string to a file
   fs.writeFile(fileName, csvContent, { encoding: 'utf8' }, (err) => {
     if (err) {
-        console.error('Error writing to file', err);
+        log.error(`Error writing to file, ${err}`);
     } else {
-        console.log('CSV file has been written successfully.');
+        log.info('CSV file has been written successfully.');
     }
   });
 

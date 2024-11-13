@@ -66,9 +66,9 @@ async function readFileLines(fileName) {
     const filePath = path.join('./manual_process/data_conversation_aban', fileName); // กำหนด path ไฟล์
     const data = await fs.readFile(filePath, 'utf8');
     listConversationId = await  data.replace(/\r/g, '').split('\n'); // ลบ \r และแบ่งเป็นบรรทัด
-    console.log('Lines:', listConversationId);
+    log.info(`Lines: ${listConversationId} `);
   } catch (err) {
-    console.error('Error reading file:', err);
+    log.error(`Error reading file: ${err}`);
   }
 }
 
@@ -80,7 +80,7 @@ let genAbandonByFile = async (env) => {
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
 
-      console.log("loginClientCredentialsGrant : ");
+      log.info("loginClientCredentialsGrant : ");
 
       await analyticsAbandonConversationsDetails();
     })
@@ -122,7 +122,7 @@ let analyticsAbandonConversationsDetails = async () => {
 
 
   for (const [index, conversationId] of listConversationId.entries()) {
-    console.log(`Line ${index + 1}:`, conversationId); // พิมพ์บรรทัดและตำแหน่งของบรรทัด
+    log.info(`Line ${index + 1}:`, conversationId); // พิมพ์บรรทัดและตำแหน่งของบรรทัด
 
     body.conversationFilters[0].predicates.push({type:"dimension" , dimension: "conversationId",operator : "matches" , value: conversationId  });
   }
@@ -152,7 +152,7 @@ let analyticsAbandonConversationsDetails = async () => {
     if (await dataAbandonList.length > 0) {
        
         await saveAbandonCallToSalesforce(dataAbandonList);
-      // await ftpFileCDR(localPath);
+      
     }
   }
 };
@@ -178,9 +178,10 @@ let isTransactionAbandonInboundCaptureByQueue = async (data_participants, listOf
 };
 
 let parserAbandonDetail = async (data) => {
-  //await log.info( `======***parserAbandonDetail***, Raw-Data= ${JSON.stringify(data)}` );
+  
   await log.info(`====== manual_save_abandon parserAbandonDetail->Begin =======`);
-  console.log("/////parserAbandonDetail/////////");
+  log.info("/////parserAbandonDetail/////////");
+
   let listOfQueues = await getGetListOfQueues();
   listOfQueues = listOfQueues.entities
   const dataAbandonList = [];
@@ -356,15 +357,13 @@ let parserAbandonDetail = async (data) => {
                       Opened_Date_Time : conversationStart,
                       GenesysUser : userName //'agentAppTest'
                   });
-                  //console.log(dataAbandonList.length +' Conversation_Id :' + conversationId +' ,SEGSTOP :'+SEGSTOP);
+                  
                 }else{
-                  console.log("ConversationId Not add :"+conversationId);
+                  log.info("ConversationId Not add :"+conversationId);
                 }
-                 //console.log("//////////////");
                  
-                  //console.log("//////////////");
                   if(dataAbandonList.length >=100  &&  dataAbandonList.length% 100 == 0){
-                    console.log("Wait for 20 seconds Rate limit exceeded the maximum api Genesys");
+                    log.info("Wait for 30 seconds Rate limit exceeded the maximum api Genesys");
                     await delay(30000);
                   }
                   
@@ -374,12 +373,12 @@ let parserAbandonDetail = async (data) => {
             }
           })
           .catch(async (err) => {
-            console.log("There was a failure calling getConversationsCall");
-            console.error(err);
+            log.error(`There was a failure calling getConversationsCall , ${err}`);
+            
           });
     }
   }
-  console.log( 'manual_save_abandon dataAbandonList Size :'+dataAbandonList.length );
+  
   await log.info( 'manual_save_abandon dataAbandonList Size :'+dataAbandonList.length );
   await log.info(`====== manual_save_abandon parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
@@ -420,8 +419,8 @@ let getGetListOfQueues = async () => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getGetListOfQueues");
-      console.error(err);
+      log.error(`There was a failure calling getGetListOfQueues , ${err}`);
+      
     });
 
   return listOfQueues;

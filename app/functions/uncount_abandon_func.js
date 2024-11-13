@@ -50,8 +50,8 @@ let getGetListOfQueues = async () => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getGetListOfQueues");
-      console.error(err);
+      log.error(`There was a failure calling getGetListOfQueues , ${err}`);
+      
     });
 
   return listOfQueues;
@@ -104,7 +104,8 @@ let getRowDataInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -125,8 +126,8 @@ let getRowDataInDataTableByID = async (id) => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatableRows , ${err}`);
+      
     });
 
   return rowDataObj;
@@ -153,8 +154,8 @@ let getDataTableByName = async (name) => {
       dataTableObj = await data;
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatables");
-      console.error(err);
+      log.error(`There was a failure calling getFlowsDatatables , ${err}` );
+      
     }
     );
 
@@ -224,7 +225,7 @@ let analyticsConversationsDetails = async () => {
     } //end for
 
     //conversationObj;
-    console.log("postAnalyticsConversationsDetailsQuery End...");
+    log.info("postAnalyticsConversationsDetailsQuery End...");
     await processUncountAbandon(conversationObj);
     
   }
@@ -239,7 +240,7 @@ let uncount_abandon_process = async (inputDate) => {
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
 
-      console.log("loginClientCredentialsGrant : ");
+      log.info("loginClientCredentialsGrant : ");
 
       let listOfQueues = await getGetListOfQueues();
       let dataTableObj = await getDataTableByName(config.GENESES.DATA_TABLE.NAME);
@@ -255,7 +256,7 @@ let uncount_abandon_process = async (inputDate) => {
             let name = "";
             if( (await listOfQueues.entities.find(element => element.id === key)) === undefined){
               
-              console.log("Queue not Found key : " +key +" : "+ dataQueueIdObj[key].queueName);
+              log.info("Queue not Found key : " +key +" : "+ dataQueueIdObj[key].queueName);
             }else{
               name = listOfQueues.entities.find(element => element.id === key).name;
             }
@@ -264,8 +265,8 @@ let uncount_abandon_process = async (inputDate) => {
           }
         }
 
-        console.log("dataTableId : " + dataTableId);
-        console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+        log.info(`dataTableId :  ${dataTableId} `);
+        log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
         await analyticsConversationsDetails();
 
@@ -317,7 +318,7 @@ let isTransactionAbandon = async (data_participants) => {
 
 let processUncountAbandon = async (conversationObj) => {
 
-  console.log("processUncountAbandon Start...");
+  log.info("processUncountAbandon Start...");
   let count = 1;
   let abanDivisionList = {};
   for (const item of conversationObj.conversations) {
@@ -350,7 +351,7 @@ let processUncountAbandon = async (conversationObj) => {
           abandonObj.conversationEnd = conversationEnd;
           abanDivisionList[divisionName].push(abandonObj);
 
-          console.log( count + ": ["+divisionName+"] "+"istAbandon conversationId : " + conversationId);
+          log.info( count + ": ["+divisionName+"] "+"istAbandon conversationId : " + conversationId);
           count = await count+1;
         }
       }
@@ -383,8 +384,10 @@ let processUncountAbandon = async (conversationObj) => {
     }
     }
   }
-  console.log("processUncountAbandon End...");
-  console.log("generateFileDetailUncountAbandon Start...");
+  
+  log.info("processUncountAbandon End...");
+  log.info("generateFileDetailUncountAbandon Start...");
+
   for(const divisionName of divisionList){
 
     let queueList = Object.keys(dataAbandonList[divisionName]);
@@ -395,7 +398,7 @@ let processUncountAbandon = async (conversationObj) => {
     }
     
   }
-  console.log("generateFileDetailUncountAbandon End...");
+  log.info("generateFileDetailUncountAbandon End...");
 };
 
 
@@ -493,9 +496,9 @@ let generateFileDetailUncountAbandon = async (divisionName,queueName,abandonList
 async function writeCsvToFile(fileName, formattedCsvContent) {
   try {
     await fs.writeFile(fileName, formattedCsvContent, { encoding: 'utf8' });
-    console.log(countCSVfile +': CSV file has been written successfully: ' + fileName);
+    log.info(countCSVfile +': CSV file has been written successfully: ' + fileName);
   } catch (err) {
-    console.error('Error writing to file', err);
+    log.error(`Error writing to file, ${err} `);
   }
 }
 
