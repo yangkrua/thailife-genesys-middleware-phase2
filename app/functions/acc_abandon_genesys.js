@@ -56,8 +56,8 @@ let getGetListOfQueues = async () => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getGetListOfQueues");
-      console.error(err);
+      log.error("There was a failure calling getGetListOfQueues");
+      log.error(err);
     });
 
   return listOfQueues;
@@ -91,8 +91,8 @@ let genAbandonAccInb = async (env) => {
           }
         }
 
-        console.log("dataTableId : " + dataTableId);
-        console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+        log.info("dataTableId : " + dataTableId);
+        log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
         await analyticsAbandonConversationsDetailsAndGenFile(dataQueueIdObj);
 
@@ -117,8 +117,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
       pDateStop = moment(pDate + "T23:59:59.000");
   }
 
-  console.log("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-  console.log("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
 
   let pageTotal = 2;
   let dataResult;
@@ -175,7 +175,7 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     let dataAbandonList = await parserAbandonDetail(conversationObj, dataQueueIdObj);
 
     for(let i=0;i<dataAbandonList.length;i++){
-      console.log(dataAbandonList[i].GenesysUser);
+      log.info(dataAbandonList[i].GenesysUser);
     }
 
     if (await dataAbandonList.length > 0) {
@@ -377,7 +377,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 
                 //console.log("//////////////");
                 if(dataAbandonList.length >=100  &&  dataAbandonList.length% 100 == 0){
-                  console.log("Wait for 30 seconds Rate limit exceeded the maximum api Genesys");
+                  log.info("Wait for 30 seconds Rate limit exceeded the maximum api Genesys");
                   await delay(30000);
                 }
                 
@@ -387,12 +387,12 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
           }
         })
         .catch(async (err) => {
-          console.log("There was a failure calling getConversationsCall");
-          console.error(err);
+          log.error("There was a failure calling getConversationsCall");
+          log.error(err);
         });
     }
   }
-  console.log( 'acc_in dataAbandonList Size :'+dataAbandonList.length );
+  
   await log.info( 'acc_in dataAbandonList Size :'+dataAbandonList.length );
   await log.info(`acc_in ====== parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
@@ -503,8 +503,8 @@ let getRowDataInDataTableByID = async (id) => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getFlowsDatatableRows");
-      console.error(err);
+      log.error("There was a failure calling getFlowsDatatableRows");
+      log.error(err);
     });
 
   return rowDataObj;
@@ -531,8 +531,8 @@ let getDataTableByName = async (name) => {
       dataTableObj = await data;
     })
     .catch((err) => {
-      console.log("There was a failure calling getFlowsDatatables");
-      console.error(err);
+      log.error("There was a failure calling getFlowsDatatables");
+      log.error(err);
     }
     );
 
