@@ -1,6 +1,12 @@
 const Client = require("ssh2-sftp-client");
 const sftp = new Client();
-const log = require("./logger.js").LOG;
+
+//const log = require("./logger.js").LOG;
+const xlog = require('./xlog.js')
+const log = new xlog('./logs/get_survey_detail', 'get_survey_detail.log');
+log.init();
+
+
 const fs = require("node:fs");
 
 const path = require("path");
@@ -34,6 +40,8 @@ let getSurveyFlowAndInsertData = async () => {
       let dataSurveyDivisionList = [];
 
       let dataTableSurveyExceptQueueObj = await getDataTableByName(config.GENESES.SURVEY_EXCEPT_QUEUE_DATA_TABLE.NAME);
+      log.info(`dataTableSurveyExceptQueueObj: ${JSON.stringify(dataTableSurveyExceptQueueObj)}`);
+
       if (await dataTableSurveyExceptQueueObj.total > 0) {
         let dataTableId = await dataTableSurveyExceptQueueObj.entities[0].id;
 

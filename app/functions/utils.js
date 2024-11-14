@@ -1,38 +1,38 @@
-const fs        = require('fs');
-const path      = require('path');
-const moment    = require('moment');
+const fs = require('fs');
+const path = require('path');
+const moment = require('moment');
 
 let removeFolderRecursive = (rootPath) => {
-    if(fs.existsSync(rootPath)){
+    if (fs.existsSync(rootPath)) {
         fs.readdirSync(rootPath)
             .forEach((file, index) => {
-                const curPath = path.join(rootPath,file);
-                if(fs.lstatSync(curPath).isDirectory()){
+                const curPath = path.join(rootPath, file);
+                if (fs.lstatSync(curPath).isDirectory()) {
                     const cureDate = moment();
                     const folderDate = moment(file);
                     const tts = cureDate.diff(folderDate, 'months');
-                    if(tts > 1){
+                    if (tts > 1) {
                         fs.rmdirSync(curPath);
-                    }                    
+                    }
                 }
             });
     }
 };
 
 
-let removeLogFile_15d = (rootPath) => {
-    if(fs.existsSync(rootPath)){
+let removeLogFile_30d = (rootPath) => {
+    if (fs.existsSync(rootPath)) {
         fs.readdirSync(rootPath)
             .forEach((file, index) => {
-                const curPath = path.join(rootPath,file);
-                if(fs.lstatSync(curPath).isDirectory()){
-                    removeLogFile_15d(curPath);                    
+                const curPath = path.join(rootPath, file);
+                if (fs.lstatSync(curPath).isDirectory()) {
+                    removeLogFile_30d(curPath);
                 }
 
                 const stats = fs.statSync(curPath);
                 duration = moment.duration(moment().diff(stats.birthtime));
 
-                if( duration.asDays() > 15){
+                if (duration.asDays() > 30) {
                     console.log('***Removed***, File=' + curPath);
                     fs.unlinkSync(curPath);
                 }
@@ -48,6 +48,6 @@ let removeLogFile_15d = (rootPath) => {
 
 module.exports = {
     removeFolderRecursive,
-    removeLogFile_15d,
+    removeLogFile_30d,
 };
 

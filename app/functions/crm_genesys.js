@@ -3,7 +3,11 @@ const genesys = require("../config/genesys_server.js");
 const salesForceService = require("./sales_force_service.js");
 
 
-const log = require("./logger.js").LOG;
+//const log = require("./logger.js").LOG;
+const xlog = require('./xlog.js')
+const log = new xlog('./logs/crm_genabandon', 'crm_genabandon.log');
+log.init();
+
 const moment = require('moment-timezone');
 const platformClient = require("purecloud-platform-client-v2");
 const apiInstance = new platformClient.ConversationsApi();
@@ -71,7 +75,7 @@ let genAbandon = async (env) => {
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
 
-      console.log("loginClientCredentialsGrant : ");
+      log.info("loginClientCredentialsGrant : ");
 
       let listOfQueues = await getGetListOfQueues();
       let dataTableObj = await getDataTableByName(config.GENESES.GEN_ABANDON_DATA_TABLE.NAME);

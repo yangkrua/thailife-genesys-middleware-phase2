@@ -2,33 +2,39 @@ const qmConfig = require("../config/qualityManagementConfig.js");
 
 
 const fs = require('fs');
-const log = require("./logger.js").LOG;
+
+//const log = require("./logger.js").LOG;
+const xlog = require('./xlog.js')
+const log = new xlog('./logs/get_quality_evaluation', 'get_quality_evaluation.log');
+log.init();
+
+
 const moment = require('moment-timezone');
 
 
 const genesysServiceImpl = require('./genesysServiceImpl.js');
 
-const genesysService =  new genesysServiceImpl();
+const genesysService = new genesysServiceImpl();
 
 let manualDateStart = null;
 let manualDateEnd = null;
 
-let manualGetEvaluationInfomation  = async (pDateStart,pDateEnd) => {
+let manualGetEvaluationInfomation = async (pDateStart, pDateEnd) => {
   manualDateStart = pDateStart;
   manualDateEnd = pDateEnd;
   await getEvaluationInfomation();
-} 
+}
 
 let getEvaluationInfomation = async () => {
-  
 
-  await log.info("Start Process getEvaluationInfomation :"+await new Date() );
+
+  await log.info("Start Process getEvaluationInfomation :" + await new Date());
 
   await genesysService.loginGenesys();
 
   await log.info(`Start Process getListUsers : ${await new Date()} `);
   const userGenesysList = await genesysService.getListUsers();
-  
+
   await log.info(`Start Process getPublishedFormsEvaluations : ${await new Date()} `);
   const publishedFormsEvaluations = await genesysService.getPublishedFormsEvaluations();
 
@@ -36,7 +42,7 @@ let getEvaluationInfomation = async () => {
   const formEvaluationGenesysList = await genesysService.getListEvaluationFormGenesys();
 
   await log.info(`Start Process filterDuplicateFormEvaluation : ${await new Date()} `);
-  const allFormEvaluationGenesysList = await filterDuplicateFormEvaluation(publishedFormsEvaluations,formEvaluationGenesysList);
+  const allFormEvaluationGenesysList = await filterDuplicateFormEvaluation(publishedFormsEvaluations, formEvaluationGenesysList);
 
   await log.info(`Start Process initFormQuestionDetail : ${await new Date()} `);
   const evaluationFormDetailGenesysList = await initFormQuestionDetail(allFormEvaluationGenesysList);
@@ -45,97 +51,97 @@ let getEvaluationInfomation = async () => {
   const conversationEvaluationDetail = await getConversationEvaluationDetail();
 
   await log.info(`Start Process analyzeEvaluationDetail : ${await new Date()} `);
-  const evaluationDetailList = await analyzeEvaluationDetail(conversationEvaluationDetail); 
+  const evaluationDetailList = await analyzeEvaluationDetail(conversationEvaluationDetail);
 
-  const userAnswersDataList= [];
+  const userAnswersDataList = [];
 
-  await console.log("Start Loop analyzeEvaluationDetail :"+await new Date() );
+  await console.log("Start Loop analyzeEvaluationDetail :" + await new Date());
   let maxQuestionAndAnswers = 0;
-  for(let i = 0 ; i< evaluationDetailList.length ; i++){
-    const evaluationDetail = evaluationDetailList[i];
-    let conversationId = evaluationDetail.conversationId;
-    let conversationStart = evaluationDetail.conversationStart;
-    let evaluationId = evaluationDetail.evaluationId;
-    let evaluationStatus = evaluationDetail.evaluationStatus;
-    let evaluatorId  = evaluationDetail.evaluatorId;
-    let assigneeId = evaluationDetail.assigneeId;
-    let eventTime  = evaluationDetail.eventTime ;
-    if(evaluationStatus != 'Pending'){
-      let answersEvaluation = await genesysService.getAnswersEvaluationFormGenesys(conversationId,evaluationId);
-      
-      if (typeof answersEvaluation !== 'undefined'){
+  for (let i = 0; i < evaluationDetailList.length; i++) {
+    const evaluationDetail = await evaluationDetailList[i];
+    let conversationId = await evaluationDetail.conversationId;
+    let conversationStart = await evaluationDetail.conversationStart;
+    let evaluationId = await evaluationDetail.evaluationId;
+    let evaluationStatus = await evaluationDetail.evaluationStatus;
+    let evaluatorId = await evaluationDetail.evaluatorId;
+    let assigneeId = await evaluationDetail.assigneeId;
+    let eventTime = await evaluationDetail.eventTime;
+    if (evaluationStatus != 'Pending') {
+      let answersEvaluation = await genesysService.getAnswersEvaluationFormGenesys(conversationId, evaluationId);
 
-        let changedDate = answersEvaluation.changedDate;
-        let assignedDate = answersEvaluation.assignedDate;
-        let agentId = answersEvaluation.agent.id;
-        let userEvaluation = userGenesysList.filter(obj => obj.id === agentId);
+      if (typeof answersEvaluation !== 'undefined') {
+
+        let changedDate = await answersEvaluation.changedDate;
+        let assignedDate = await answersEvaluation.assignedDate;
+        let agentId = await answersEvaluation.agent.id;
+        let userEvaluation = await userGenesysList.filter(obj => obj.id === agentId);
         let evaluatorName = "";
         let assigneeName = "";
 
-        if (userGenesysList.filter(obj => obj.id === evaluatorId).length > 0){
-          evaluatorName = userGenesysList.filter(obj => obj.id === evaluatorId)[0].name;
+        if (userGenesysList.filter(obj => obj.id === evaluatorId).length > 0) {
+          evaluatorName = await userGenesysList.filter(obj => obj.id === evaluatorId)[0].name;
         }
 
-        if (userGenesysList.filter(obj => obj.id === assigneeId).length > 0){
-          assigneeName = userGenesysList.filter(obj => obj.id === assigneeId)[0].name;
+        if (userGenesysList.filter(obj => obj.id === assigneeId).length > 0) {
+          assigneeName = await userGenesysList.filter(obj => obj.id === assigneeId)[0].name;
         }
 
-        if (typeof userEvaluation !== 'undefined' && userEvaluation.length > 0){
+        if (typeof userEvaluation !== 'undefined' && userEvaluation.length > 0) {
 
 
-          let divisionName = userEvaluation[0].divisionName;
-          let name = userEvaluation[0].name;
-          let userName  = userEvaluation[0].userName ;
-          let department = userEvaluation[0].department ;
-          let title = userEvaluation[0].title ;
-          
-          let formName = evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].name;
-          let formContextId  = evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].contextId;
-          let formId  = evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].id;
-          let formModifiedDate  = evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].modifiedDate;
-          
+          let divisionName = await userEvaluation[0].divisionName;
+          let name = await userEvaluation[0].name;
+          let userName = await userEvaluation[0].userName;
+          let department = await userEvaluation[0].department;
+          let title = await userEvaluation[0].title;
+
+          let formName = await evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].name;
+          let formContextId = await evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].contextId;
+          let formId = await evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].id;
+          let formModifiedDate = await evaluationFormDetailGenesysList.filter(obj => obj.id === answersEvaluation.evaluationForm.id)[0].modifiedDate;
+
           let comments = '';
-          let agentComments  = '';
+          let agentComments = '';
 
           if (typeof answersEvaluation.answers !== 'undefined'
-              && typeof answersEvaluation.answers.comments !== 'undefined'){
-            
-                comments = answersEvaluation.answers.comments;
+            && typeof answersEvaluation.answers.comments !== 'undefined') {
+
+            comments = await answersEvaluation.answers.comments;
           }
           if (typeof answersEvaluation.answers !== 'undefined'
-            && typeof answersEvaluation.answers.agentComments !== 'undefined'){
-          
-              agentComments = answersEvaluation.answers.agentComments;
+            && typeof answersEvaluation.answers.agentComments !== 'undefined') {
+
+            agentComments = await answersEvaluation.answers.agentComments;
           }
 
-          const questionAndAnswersList = await filterQuestionScores(answersEvaluation,evaluationFormDetailGenesysList)
+          const questionAndAnswersList = await filterQuestionScores(answersEvaluation, evaluationFormDetailGenesysList)
 
-          if( maxQuestionAndAnswers < questionAndAnswersList.length ){
-            maxQuestionAndAnswers = questionAndAnswersList.length;
+          if (maxQuestionAndAnswers < questionAndAnswersList.length) {
+            maxQuestionAndAnswers = await questionAndAnswersList.length;
           }
 
           let dataFinal = {};
 
-          dataFinal.conversationId = conversationId;
-          dataFinal.conversationStart = conversationStart;
-          dataFinal.userName = userName;
-          dataFinal.name = name;
-          dataFinal.department = department;
-          dataFinal.title = title;
-          dataFinal.comments = comments;
-          dataFinal.agentComments = agentComments;
-          dataFinal.divisionName = divisionName;
-          dataFinal.evaluationId = evaluationId;
-          dataFinal.evaluationStatus = evaluationStatus;
-          dataFinal.evaluatorName = evaluatorName;
-          dataFinal.assigneeName = assigneeName;
-          dataFinal.formContextId = formContextId;
-          dataFinal.formId = formId;
-          dataFinal.formName = formName;
-          dataFinal.formModifiedDate = formModifiedDate;
-          dataFinal.questionAndAnswersList = questionAndAnswersList;
-          dataFinal.changedDate = changedDate;
-          dataFinal.assignedDate = assignedDate;
+          dataFinal.conversationId = await conversationId;
+          dataFinal.conversationStart = await conversationStart;
+          dataFinal.userName = await userName;
+          dataFinal.name = await name;
+          dataFinal.department = await department;
+          dataFinal.title = await title;
+          dataFinal.comments = await comments;
+          dataFinal.agentComments = await agentComments;
+          dataFinal.divisionName = await divisionName;
+          dataFinal.evaluationId = await evaluationId;
+          dataFinal.evaluationStatus = await evaluationStatus;
+          dataFinal.evaluatorName = await evaluatorName;
+          dataFinal.assigneeName = await assigneeName;
+          dataFinal.formContextId = await formContextId;
+          dataFinal.formId = await formId;
+          dataFinal.formName = await formName;
+          dataFinal.formModifiedDate = await formModifiedDate;
+          dataFinal.questionAndAnswersList = await questionAndAnswersList;
+          dataFinal.changedDate = await changedDate;
+          dataFinal.assignedDate = await assignedDate;
           userAnswersDataList.push(dataFinal);
 
           log.info("conversationId : " + conversationId);
@@ -145,12 +151,12 @@ let getEvaluationInfomation = async () => {
 
         await log.info("End ");
       }
-     
+
     }
-  
+
   }
-  
-  await generateCSVFile(userAnswersDataList,maxQuestionAndAnswers);
+
+  await generateCSVFile(userAnswersDataList, maxQuestionAndAnswers);
   await log.info("End Loop");
 
 }
@@ -186,50 +192,50 @@ let convertDateFormatToDDMMYYYYHHMMSS = async (isoDate) => {
   return `${formattedDate} ${formattedTime}`;
 }
 
-let generateCSVFile= async (userAnswersDataList,maxQuestionAndAnswers) => {
+let generateCSVFile = async (userAnswersDataList, maxQuestionAndAnswers) => {
 
   let csvContent = '\uFEFF'; // Adding BOM to the beginning
-   csvContent += 'Date,Conversation Id,Agent ID,Agent Name,BU,Department,Title,Form Context ID,Form ID,Form Name,Assigned Date,Changed Date,Evaluation Status,Evaluator Name,Assignee Name,Evaluator Comments,Agent Review Comments'; // Headers
+  csvContent += 'Date,Conversation Id,Agent ID,Agent Name,BU,Department,Title,Form Context ID,Form ID,Form Name,Assigned Date,Changed Date,Evaluation Status,Evaluator Name,Assignee Name,Evaluator Comments,Agent Review Comments'; // Headers
 
-  for(let i=1; i <= maxQuestionAndAnswers ; i++){
+  for (let i = 1; i <= maxQuestionAndAnswers; i++) {
     csvContent += `,Question ${i} (Score)`
   }
   csvContent += '\n';
 
 
-  for(let i=0 ; i < userAnswersDataList.length ; i++){
-  
+  for (let i = 0; i < userAnswersDataList.length; i++) {
+
     let detail = userAnswersDataList[i];
 
-    
+
     let conversationStart = await convertDateFormattToDDMMYYYY(detail.conversationStart);
-    let conversationId = detail.conversationId;
-    let userName = detail.userName;
-    let name = detail.name;
-    let department = detail.department;
-    let title = detail.title;
-    let divisionName = detail.divisionName;
-    let evaluationId = detail.evaluationId;
-    let evaluationStatus = detail.evaluationStatus;
-    let evaluatorName = detail.evaluatorName;
-    let assigneeName = detail.assigneeName;
-    let formContextId = detail.formContextId;
-    let formId = detail.formId;
-    let formName = detail.formName;
+    let conversationId = await detail.conversationId;
+    let userName = await detail.userName;
+    let name = await detail.name;
+    let department = await detail.department;
+    let title = await detail.title;
+    let divisionName = await detail.divisionName;
+    let evaluationId = await detail.evaluationId;
+    let evaluationStatus = await detail.evaluationStatus;
+    let evaluatorName = await detail.evaluatorName;
+    let assigneeName = await detail.assigneeName;
+    let formContextId = await detail.formContextId;
+    let formId = await detail.formId;
+    let formName = await detail.formName;
     let formModifiedDate = await convertDateFormattToDDMMYYYY(detail.formModifiedDate);
-    let comments = detail.comments.replace(/\n/g, " ");
-    let agentComments = detail.agentComments.replace(/\n/g, " ");
+    let comments = await detail.comments.replace(/\n/g, " ");
+    let agentComments = await detail.agentComments.replace(/\n/g, " ");
     let changedDate = await convertDateFormatToDDMMYYYYHHMMSS(detail.changedDate);
     let assignedDate = await convertDateFormatToDDMMYYYYHHMMSS(detail.assignedDate);
 
-    csvContent += `${conversationStart},${conversationId},${userName},${name},${divisionName},${department},${title},${formContextId},${formId},${formName},${assignedDate},${changedDate},${evaluationStatus},${evaluatorName},${assigneeName},${comments},${agentComments}`;
-    
-    let questionAndAnswersList = detail.questionAndAnswersList;
-    
-    for(let j =0 ; j< questionAndAnswersList.length ; j++){
-      let questionAndAnswers = questionAndAnswersList[j];
-      let score = questionAndAnswers.score;
-      csvContent += `,${score}`
+    csvContent += await `${conversationStart},${conversationId},${userName},${name},${divisionName},${department},${title},${formContextId},${formId},${formName},${assignedDate},${changedDate},${evaluationStatus},${evaluatorName},${assigneeName},${comments},${agentComments}`;
+
+    let questionAndAnswersList = await detail.questionAndAnswersList;
+
+    for (let j = 0; j < questionAndAnswersList.length; j++) {
+      let questionAndAnswers = await questionAndAnswersList[j];
+      let score = await questionAndAnswers.score;
+      csvContent += await `,${score}`
     }
 
     csvContent += '\n';
@@ -239,104 +245,106 @@ let generateCSVFile= async (userAnswersDataList,maxQuestionAndAnswers) => {
 
   // ฟังก์ชันเพื่อเติมเลข 0 ข้างหน้า (ถ้าจำเป็น)
   const padZero = (num, size) => String(num).padStart(size, '0');
-  
+
   // สร้างฟอร์แมตตามที่ต้องการ  // Output: 20240914_104257828
-  const formattedDateTime = 
-    now.getFullYear() + 
-    padZero(now.getMonth() + 1, 2) + 
+  const formattedDateTime =
+    now.getFullYear() +
+    padZero(now.getMonth() + 1, 2) +
     padZero(now.getDate(), 2) + '_' +
-    padZero(now.getHours(), 2) + 
-    padZero(now.getMinutes(), 2) + 
-    padZero(now.getSeconds(), 2) + 
+    padZero(now.getHours(), 2) +
+    padZero(now.getMinutes(), 2) +
+    padZero(now.getSeconds(), 2) +
     padZero(now.getMilliseconds(), 3);
-  
-  let pathFile =  qmConfig.data_process_inbox ; 
-  let fileName = `${pathFile}/QualityEvaluation_${formattedDateTime}.csv`;
+
+  let pathFile = await qmConfig.data_process_inbox;
+  let fileName = await `${pathFile}/QualityEvaluation_${formattedDateTime}.csv`;
 
   // Write the CSV string to a file
   fs.writeFile(fileName, csvContent, { encoding: 'utf8' }, (err) => {
     if (err) {
-        log.error(`Error writing to file, ${err}`);
+      log.error(`Error writing to file, ${err}`);
     } else {
-        log.info('CSV file has been written successfully.');
+      log.info('CSV file has been written successfully.');
     }
   });
 
 }
 
-let filterQuestionScores = async (answersEvaluation,evaluationFormDetailGenesysList) => {
+let filterQuestionScores = async (answersEvaluation, evaluationFormDetailGenesysList) => {
   let answerList = answersEvaluation.answers;
   let questionGroupScoreList = answerList.questionGroupScores;
 
   const questionScoreDetailList = [];
-  for(let i=0 ; i< questionGroupScoreList.length ; i++){
-      const questionGroupScore =  questionGroupScoreList[i];
+  for (let i = 0; i < questionGroupScoreList.length; i++) {
+    const questionGroupScore = questionGroupScoreList[i];
 
-      const questionGroupId = questionGroupScore.questionGroupId;
-      const questionScoreList = questionGroupScore.questionScores;
-       
-      let questionGroupName = evaluationFormDetailGenesysList
-        .flatMap(obj => obj.questionGroupsList) // Flatten categories arrays
-        .find(questionGroup => questionGroup.id === questionGroupId).name
+    const questionGroupId = questionGroupScore.questionGroupId;
+    const questionScoreList = questionGroupScore.questionScores;
 
-      for(let j = 0 ; j< questionScoreList.length ; j++){
-        let questionScoreDetail =  questionScoreList[j];
-        
-        const questionId = questionScoreDetail.questionId;
+    let questionGroupName = await evaluationFormDetailGenesysList
+      .flatMap(obj => obj.questionGroupsList) // Flatten categories arrays
+      .find(questionGroup => questionGroup.id === questionGroupId).name
 
-        const questionName =  evaluationFormDetailGenesysList
+    for (let j = 0; j < questionScoreList.length; j++) {
+      let questionScoreDetail = await questionScoreList[j];
+
+      const questionId = await questionScoreDetail.questionId;
+
+      const questionName = await evaluationFormDetailGenesysList
         .flatMap(obj => obj.questionGroupsList) // Flatten categories arrays
         .flatMap(questionGroup => questionGroup.questions) // Flatten items arrays
         .find(question => question.id === questionId).text;
 
-        questionScoreDetail.questionGroupId = questionGroupId;
-        questionScoreDetail.questionGroupName = questionGroupName;
-        questionScoreDetail.questionName = questionName;
-        questionScoreDetailList.push(questionScoreDetail);
-      }
+      questionScoreDetail.questionGroupId = await questionGroupId;
+      questionScoreDetail.questionGroupName = await questionGroupName;
+      questionScoreDetail.questionName = await questionName;
+
+      questionScoreDetailList.push(questionScoreDetail);
+    }
   }
 
   return questionScoreDetailList;
 
-} 
+}
 
-let filterDuplicateFormEvaluation= async (publishedFormsEvaluations,formEvaluationGenesysList) => {
+let filterDuplicateFormEvaluation = async (publishedFormsEvaluations, formEvaluationGenesysList) => {
 
   let allFormEvaluationGenesysList = publishedFormsEvaluations;
 
-  for(let i =0 ;i < formEvaluationGenesysList.length ; i++){
+  for (let i = 0; i < formEvaluationGenesysList.length; i++) {
 
-    const data = formEvaluationGenesysList[i];
+    const data = await formEvaluationGenesysList[i];
 
-    const exists = allFormEvaluationGenesysList.some(obj => obj.id === data.id);
+    const exists = await allFormEvaluationGenesysList.some(obj => obj.id === data.id);
 
-    if(!exists){
+    if (!exists) {
       publishedFormsEvaluations.push(data);
     }
 
 
-  } 
+  }
 
   return publishedFormsEvaluations;
 
 }
-let analyzeEvaluationDetail= async (conversationEvaluationDetail) => {
+let analyzeEvaluationDetail = async (conversationEvaluationDetail) => {
 
-  let evaluationDetailGenesys = conversationEvaluationDetail.conversations;
+  let evaluationDetailGenesys = await conversationEvaluationDetail.conversations;
 
   const evaluationDetailList = [];
 
-  for(let i = 0 ; i < evaluationDetailGenesys.length ; i++){
+  for (let i = 0; i < evaluationDetailGenesys.length; i++) {
 
-    let data = evaluationDetailGenesys[i];
-    let evaluationList = data.evaluations;
-    
-    for(let j =0 ; j < evaluationList.length ; j++){
-      evaluationList[j].conversationId  = data.conversationId;
-      evaluationList[j].conversationStart   = data.conversationStart ;
+    let data = await evaluationDetailGenesys[i];
+    let evaluationList = await data.evaluations;
+
+    for (let j = 0; j < evaluationList.length; j++) {
+      evaluationList[j].conversationId = await data.conversationId;
+      evaluationList[j].conversationStart = await data.conversationStart;
+
       evaluationDetailList.push(evaluationList[j]);
     }
-    
+
   }
 
   return evaluationDetailList;
@@ -348,22 +356,22 @@ let getConversationEvaluationDetail = async () => {
   var pDateStart = moment().add(- qmConfig.data_query_period_month, "months").startOf('day');
   var pDateStop = moment();
 
-  if(manualDateStart  != null){
+  if (manualDateStart != null) {
     pDateStart = moment(manualDateStart + "T00:00:00.000");
   }
 
-  if(manualDateEnd   != null){
-    pDateStop = moment(manualDateEnd  + "T23:59:59.000");
+  if (manualDateEnd != null) {
+    pDateStop = moment(manualDateEnd + "T23:59:59.000");
   }
 
   let body = {
-    
+
     interval: pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ") + "/" + pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
     evaluationFilters: [
       {
         predicates: [
           {
-            type : "dimension",
+            type: "dimension",
             dimension: "evaluationId",
             operator: "exists",
           },
@@ -384,8 +392,8 @@ let getConversationEvaluationDetail = async () => {
 
 let initFormQuestionDetail = async (evaluationFormGenesysList) => {
 
-  for(let i=0 ; i < evaluationFormGenesysList.length ; i++){
-    let formId =  evaluationFormGenesysList[i].id;
+  for (let i = 0; i < evaluationFormGenesysList.length; i++) {
+    let formId = evaluationFormGenesysList[i].id;
     evaluationFormGenesysList[i].questionGroupsList = await genesysService.getListFormDetailGenesys(formId);
   }
 

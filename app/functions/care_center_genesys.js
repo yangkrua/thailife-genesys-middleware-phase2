@@ -1,6 +1,12 @@
 const Client = require("ssh2-sftp-client");
 const sftp = new Client();
-const log = require("./logger.js").LOG;
+
+//const log = require("./logger.js").LOG;
+const xlog = require('./xlog.js')
+const log = new xlog('./logs/care_center_genesys', 'care_center_genesys.log');
+log.init();
+
+
 const fs = require("node:fs");
 const moment = require('moment-timezone');
 const path = require("path");
@@ -63,8 +69,8 @@ let getGetListOfQueues = async () => {
       }
     })
     .catch(async (err) => {
-      console.log("There was a failure calling getGetListOfQueues");
-      console.error(err);
+      log.error(`There was a failure calling getGetListOfQueues , ${err}`);
+      
     });
 
   return listOfQueues;
@@ -97,8 +103,8 @@ let genAbandonCareCenter = async (env) => {
           }
         }
         
-        console.log("dataTableId : " + dataTableId);
-        console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+        log.info("dataTableId : " + dataTableId);
+        log.info(`dataQueueIdObj, data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
         await analyticsAbandonConversationsDetailsAndGenFile(dataQueueIdObj);
 
@@ -121,8 +127,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     pDateStop = moment(pDate + "T23:59:59.000");
   }
 
-  console.log("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-  console.log("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
 
   let pageTotal = 2;
   let dataResult;
@@ -181,7 +187,7 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     if (await dataAbandonList.length > 0) {
        
         await saveAbandonCallToSalesforce(dataAbandonList);
-      // await ftpFileCDR(localPath);
+      
     }
   }
 };
@@ -270,12 +276,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   let differenceInMilliseconds = SEGSTOP - SEGSTART;
                   // แปลงระยะเวลาเป็นวินาที
                   let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
-
-                  //console.log(`Duration in seconds: ${differenceInSeconds}`);
-
-                  //console.log("//////////////");
-                  //console.log(participant.attributes);
-                  //console.log("//////////////");
+                  
 
                   let conversationStart = new Date(item.conversationStart).toISOString().replace('Z', '+0000');
                   let conversationEnd = new Date(item.conversationEnd).toISOString().replace('Z', '+0000');
@@ -284,7 +285,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   //let conversationEnd = await moment(item.conversationEnd).format('YYYY-MM-DDTHH:mm:ss.SSS+0000');
 
 
-                  let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
+                  let uui = await participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
                   if(uui == ''){
                     uui = "||||"
                   }
@@ -292,12 +293,12 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   let countPipe  = await uui.split('|').length - 1;
                   let checkAddList = true;
 
-                  let ANI_NUMBER = participant.attributes["ANI_NUMBER"] === undefined ? "" : participant.attributes["ANI_NUMBER"];
-                  let DNIS_NUMBER = participant.attributes["DNIS_NUMBER"] === undefined ? "" : participant.attributes["DNIS_NUMBER"];
-                  let IVR_DNIS = participant.attributes["IVR_DNIS"] === undefined ? "" : participant.attributes["IVR_DNIS"];
+                  let ANI_NUMBER = await participant.attributes["ANI_NUMBER"] === undefined ? "" : participant.attributes["ANI_NUMBER"];
+                  let DNIS_NUMBER = await participant.attributes["DNIS_NUMBER"] === undefined ? "" : participant.attributes["DNIS_NUMBER"];
+                  let IVR_DNIS = await participant.attributes["IVR_DNIS"] === undefined ? "" : participant.attributes["IVR_DNIS"];
                   
-                  let CX_CALLED = participant.attributes["CX_CALLED"] === undefined ? "" : participant.attributes["CX_CALLED"];
-                  let transfer_InternalVDN = participant.attributes["transfer_InternalVDN"] === undefined ? "" : participant.attributes["transfer_InternalVDN"];
+                  let CX_CALLED = await participant.attributes["CX_CALLED"] === undefined ? "" : participant.attributes["CX_CALLED"];
+                  let transfer_InternalVDN = await participant.attributes["transfer_InternalVDN"] === undefined ? "" : participant.attributes["transfer_InternalVDN"];
                   transfer_InternalVDN = await transfer_InternalVDN.replace('+', '');
                   
                   ANI_NUMBER = await parserTelPhoneNumber(ANI_NUMBER);
@@ -372,12 +373,12 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                       Opened_Date_Time : conversationStart,
                       GenesysUser : userName //'agentAppTest'
                   });
-                  //console.log(dataAbandonList.length +' Conversation_Id :' + conversationId +' ,SEGSTOP :'+SEGSTOP);
+                  
                 }
                                   
-                  //console.log("//////////////");
+                  
                   if(dataAbandonList.length >=100  &&  dataAbandonList.length% 100 == 0){
-                    console.log("Wait for 20 seconds Rate limit exceeded the maximum api Genesys");
+                    log.info("Wait for 30 seconds Rate limit exceeded the maximum api Genesys");
                     await delay(30000);
                   }
                   
@@ -494,7 +495,7 @@ let CARE_VOICEMAIL = async (dataQueueIdObj) => {
 };
 
 let parserCDR_CARE_VOICEMAIL = async (data,dataQueueIdObj) => {
-  //log.info( `======***parserCDR_BY_Queue_LIST***, Raw-Data= ${JSON.stringify(data)}` );
+  
   log.info(`====== parserCDR_CARE_VOICEMAIL->Begin =======`);
 
   let textCRD = '';
@@ -777,17 +778,17 @@ let parserCDR_IVR_Log = async (data,dataQueueIdObj) => {
             ) {
                   let ucid = data.id;
 
-                  let ivrMenuLogString = participant.attributes.IVR_MENU_LOG;
-                  let ivrMenuLogList = ivrMenuLogString.split(';').filter(Boolean);  // Split by ';' and remove empty elements
-                  ivrMenuLogList = ivrMenuLogList.map(item => item.split(','));  // Split each part by ','
+                  let ivrMenuLogString = await participant.attributes.IVR_MENU_LOG;
+                  let ivrMenuLogList = await ivrMenuLogString.split(';').filter(Boolean);  // Split by ';' and remove empty elements
+                  ivrMenuLogList = await ivrMenuLogList.map(item => item.split(','));  // Split each part by ','
 
                   if(ivrMenuLogList.length > 0){
                     for(let indexMenu = 0 ; indexMenu < ivrMenuLogList.length ; indexMenu++){
                       let ivrMenuLog = ivrMenuLogList[indexMenu];
                       if(ivrMenuLog.length == 2){
 
-                        let menucode = ivrMenuLog[1];;
-                        let start_time = ivrMenuLog[0];
+                        let menucode = await ivrMenuLog[1];;
+                        let start_time = await ivrMenuLog[0];
                         let sequence = await(indexMenu+1);
   
                         // สร้าง Date object จากสตริงวันที่
@@ -830,6 +831,7 @@ let parserCDR_IVR_Log = async (data,dataQueueIdObj) => {
 function isValidDate(date) {
   return date instanceof Date && !isNaN(date.getTime());
 }
+
 let Gen_CARE_CALLBACK = async () => {
   await client
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
@@ -942,7 +944,7 @@ let parserCDR_CARE_CALLBACK = async (data,dataQueueIdObj) => {
                   ) {
                     for(let index_p = 0 ;index_p < data.participants.length ; index_p++){
                       let participant = await data.participants[index_p];
-                      //log.info( `API->postAnalyticsConversationsDetailsQuery(), Result: ${JSON.stringify(data)}` );
+                      
                       if (
                         (await participant) !== undefined &&
                         (await participant.attributes)  !== undefined &&
@@ -963,7 +965,7 @@ let parserCDR_CARE_CALLBACK = async (data,dataQueueIdObj) => {
                             
                           });
 
-                          //log.info('ucid : '+ucid);                          
+                          
 
                           textCRD += await (ucid + "|"); //UCID
                           textCRD += await (customerphoneNumber + "|"); //Customer
@@ -1008,7 +1010,8 @@ let CallbackGetQueueIdInDataTableByID = async (id) => {
     // Returns the rows for the datatable with the given id
     await apiInstance.getFlowsDatatableRows(datatableId, opts)
       .then(async (dataResult) => {
-        //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+        log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+        
         if (
           (await dataResult) !== undefined &&
           (await dataResult.total) > 0

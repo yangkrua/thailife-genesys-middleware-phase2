@@ -1,4 +1,8 @@
-const log = require("./logger.js").LOG;
+//const log = require("./logger.js").LOG;
+const xlog = require('./xlog.js')
+const log = new xlog('./logs/acc_inb_genabandon', 'acc_inb_genabandon.log');
+log.init();
+
 const moment = require('moment-timezone');
 //const moment = require("moment");
 const config = require("../config/acc_server.js");
@@ -17,7 +21,7 @@ client.setEnvironment(genesys.GENESES.org_region);
 let pDate = null;
 let environment = null;
 
-let ManualGenAbandonAccInb = async (pDateIn,env) => {
+let ManualGenAbandonAccInb = async (pDateIn, env) => {
   pDate = pDateIn;
   await genAbandonAccInb(env);
 };
@@ -34,7 +38,7 @@ let getGetListOfQueues = async () => {
     "pageSize": 100 // Number | Page size
   };
 
-  await apiInstance.getRoutingQueues( opts)
+  await apiInstance.getRoutingQueues(opts)
     .then(async (dataResult) => {
       if (
         (await dataResult) !== undefined &&
@@ -67,7 +71,7 @@ let getGetListOfQueues = async () => {
 let genAbandonAccInb = async (env) => {
 
   environment = env;
-  
+
   await client
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
@@ -102,23 +106,23 @@ let genAbandonAccInb = async (env) => {
     .catch(async (error) => {
       log.error(`API->loginClientCredentialsGrant(), error: ${error.message}`);
     });
-    
-    log.info("End Process genAbandonAccInb :"+await new Date() );
+
+  log.info("End Process genAbandonAccInb :" + await new Date());
 };
 
 let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
 
-  
+
   let pDateStart = moment().add(-config.GENESES.data_query_ABANDON_period, "minute");
   let pDateStop = moment();
 
-  if(pDate != null){
-      pDateStart = moment(pDate + "T00:00:00.000");
-      pDateStop = moment(pDate + "T23:59:59.000");
+  if (pDate != null) {
+    pDateStart = moment(pDate + "T00:00:00.000");
+    pDateStop = moment(pDate + "T23:59:59.000");
   }
 
-  log.info("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-  log.info("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStart : " + pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStop : " + pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
 
   let pageTotal = 2;
   let dataResult;
@@ -174,19 +178,19 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
 
     let dataAbandonList = await parserAbandonDetail(conversationObj, dataQueueIdObj);
 
-    for(let i=0;i<dataAbandonList.length;i++){
+    for (let i = 0; i < dataAbandonList.length; i++) {
       log.info(dataAbandonList[i].GenesysUser);
     }
 
     if (await dataAbandonList.length > 0) {
-        await saveAbandonCallToSalesforce(dataAbandonList);
+      await saveAbandonCallToSalesforce(dataAbandonList);
     }
   }
 };
 
 let saveAbandonCallToSalesforce = async (dataAbandonList) => {
-  log.info( `ACC INB dataAbandonList Result: ${JSON.stringify(dataAbandonList)}` );
-  await salesForceService.callApiSaveAbandonCallSalesforce(dataAbandonList,environment);
+  log.info(`ACC INB dataAbandonList Result: ${JSON.stringify(dataAbandonList)}`);
+  await salesForceService.callApiSaveAbandonCallSalesforce(dataAbandonList, environment);
   log.info("ACC INB saveAbandonCallToSalesforce Done");
 };
 
@@ -200,19 +204,19 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
 
     const queueName = await isTransactionAbandonInboundCaptureByQueue(item.participants, dataQueueIdObj);
 
-    if ( await queueName != '') {
+    if (await queueName != '') {
 
       let tNotResoindingList = await tNotResoinding(item.participants);
 
-      if(tNotResoindingList.length == 0){
+      if (tNotResoindingList.length == 0) {
         continue;
       }
 
-      let userId =tNotResoindingList[0].userId;
+      let userId = tNotResoindingList[0].userId;
       let apiInstanceUsersApi = new platformClient.UsersApi();
-      let opts = { 
+      let opts = {
       };
-      
+
 
       let conversationId = item.conversationId;
       await apiInstance.getConversationsCall(conversationId)//('e40c2393-0932-456c-b763-37ff90118aff')      //(conversationId)
@@ -227,25 +231,25 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
               let participant = await data.participants[index_p];
 
               if (
-                (await participant) !== undefined 
-                && (await participant.attributes)  !== undefined 
-                && (await participant.attributes["DNIS_NUMBER"])  !== undefined 
+                (await participant) !== undefined
+                && (await participant.attributes) !== undefined
+                && (await participant.attributes["DNIS_NUMBER"]) !== undefined
               ) {
 
                 let userName = '';
                 // Get user.
                 await apiInstanceUsersApi.getUser(userId, opts)
-                .then(async (data) => {
-                  let email = data.email;
-                  userName = email.substring(0, email.indexOf('@'));
-                })
-                .catch(async (err) => {
-                  console.log("There was a failure calling getUser");
-                  console.error(err);
-                });
+                  .then(async (data) => {
+                    let email = data.email;
+                    userName = email.substring(0, email.indexOf('@'));
+                  })
+                  .catch(async (err) => {
+                    console.log("There was a failure calling getUser");
+                    console.error(err);
+                  });
 
-                let SEGSTART = await moment(item.conversationStart) ; //SEGSTART
-                let SEGSTOP = await moment(item.conversationEnd) ; //SEGSTOP
+                let SEGSTART = await moment(item.conversationStart); //SEGSTART
+                let SEGSTOP = await moment(item.conversationEnd); //SEGSTOP
 
                 // คำนวณความแตกต่างระหว่าง SEGSTART และ SEGSTOP
                 let duration = await moment.duration(SEGSTOP.diff(SEGSTART));
@@ -263,7 +267,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
 
                 // แปลงเป็นตัวเลขประเภท double (18, 2)
                 let doubleDuration = parseFloat(formattedDuration);
-                
+
                 let differenceInMilliseconds = SEGSTOP - SEGSTART;
                 // แปลงระยะเวลาเป็นวินาที
                 let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
@@ -283,11 +287,11 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
 
 
                 let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
-                if(uui == ''){
+                if (uui == '') {
                   uui = "||||"
                 }
 
-                let countPipe  = await uui.split('|').length - 1;
+                let countPipe = await uui.split('|').length - 1;
                 let checkAddList = true;
 
                 let ANI_NUMBER = participant.attributes["ANI_NUMBER"] === undefined ? "" : participant.attributes["ANI_NUMBER"];
@@ -301,7 +305,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
 
                 ANI_NUMBER = await parserTelPhoneNumber(ANI_NUMBER);
                 DNIS_NUMBER = await parserTelPhoneNumber(DNIS_NUMBER);
-                
+
                 ANI_NUMBER = await parserPhoneNumber(ANI_NUMBER);
                 DNIS_NUMBER = await parserPhoneNumber(DNIS_NUMBER);
                 IVR_DNIS = await parserPhoneNumber(IVR_DNIS);
@@ -309,30 +313,30 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 IVR_DNIS = await IVR_DNIS.replace('+', '');
                 DNIS_NUMBER = await DNIS_NUMBER.replace('+', '');
 
-                if(await countPipe >=3){
-                  let uuiSplit =  uui.split('|');
+                if (await countPipe >= 3) {
+                  let uuiSplit = uui.split('|');
 
-                  if(CX_CALLED != ''){
-                    uui = uuiSplit[0]+'|'+uuiSplit[1]+'|'+uuiSplit[2]+'|'+uuiSplit[3]+"|"+IVR_DNIS
-                  }else{
-                    uui = uuiSplit[0]+'|'+uuiSplit[1]+'|'+uuiSplit[2]+'|'+uuiSplit[3]+"|"+DNIS_NUMBER
+                  if (CX_CALLED != '') {
+                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
+                  } else {
+                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
                   }
 
-                  
-                }else if(await countPipe <3){
+
+                } else if (await countPipe < 3) {
                   checkAddList = false;
                 }
 
-                if(checkAddList){
-                  if ((ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) || CX_CALLED != '' ) {
+                if (checkAddList) {
+                  if ((ANI_NUMBER.startsWith("0") && ANI_NUMBER.length >= 9) || CX_CALLED != '') {
                     checkAddList = true;
                   } else {
                     checkAddList = false;
                   }
                 }
 
-                if(checkAddList){
-                  if ( (DNIS_NUMBER.startsWith("0") && DNIS_NUMBER.length >= 9)
+                if (checkAddList) {
+                  if ((DNIS_NUMBER.startsWith("0") && DNIS_NUMBER.length >= 9)
                     || DNIS_NUMBER.length == 5 || DNIS_NUMBER.length == 4) {
                     checkAddList = true;
                   } else {
@@ -340,47 +344,47 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   }
                 }
 
-                if(CX_CALLED != ''){
-                  if( transfer_InternalVDN != ''){
+                if (CX_CALLED != '') {
+                  if (transfer_InternalVDN != '') {
                     DNIS_NUMBER = transfer_InternalVDN;
-                  }else{
-                    DNIS_NUMBER = '47'+CX_CALLED;
+                  } else {
+                    DNIS_NUMBER = '47' + CX_CALLED;
                   }
                 }
-                
-                if (checkAddList  ) {
-                  
+
+                if (checkAddList) {
+
                   dataAbandonList.push({
-                    CallStartTime : conversationStart,
-                    CallDurationHHMMSS : callDuration,
-                    QueueName : queueName,
-                    Caller : ANI_NUMBER,
-                    UUI : uui,
-                    Called : DNIS_NUMBER,
-                    PolicyNumber : participant.attributes["POLICY_NUMBER"] === undefined ? "" : participant.attributes["POLICY_NUMBER"],
-                    AgentCode : participant.attributes["AGENT_CODE"] === undefined ? "" : participant.attributes["AGENT_CODE"],
-                    Conversation_Id : conversationId,
-                    PINCodeResult : participant.attributes["AGENT_PINCODE"] === undefined ? "" : participant.attributes["AGENT_PINCODE"],
-                    IVRLastMenuName : participant.attributes["IVR_LASTMENU"] === undefined ? "" : participant.attributes["IVR_LASTMENU"],
-                    UUI_B_Number : IVR_DNIS,
-                    Call_Duration_MM_SS : doubleDuration,
-                    CallDisposition : "Abandon",
-                    CallDurationInSeconds : differenceInSeconds,
-                    Closed_Date_Time : conversationEnd,
-                    CompletedDateTime : conversationEnd,
-                    Opened_Date_Time : conversationStart,
-                    GenesysUser : userName //'agentAppTest'
-                });
-                
-              }
+                    CallStartTime: conversationStart,
+                    CallDurationHHMMSS: callDuration,
+                    QueueName: queueName,
+                    Caller: ANI_NUMBER,
+                    UUI: uui,
+                    Called: DNIS_NUMBER,
+                    PolicyNumber: participant.attributes["POLICY_NUMBER"] === undefined ? "" : participant.attributes["POLICY_NUMBER"],
+                    AgentCode: participant.attributes["AGENT_CODE"] === undefined ? "" : participant.attributes["AGENT_CODE"],
+                    Conversation_Id: conversationId,
+                    PINCodeResult: participant.attributes["AGENT_PINCODE"] === undefined ? "" : participant.attributes["AGENT_PINCODE"],
+                    IVRLastMenuName: participant.attributes["IVR_LASTMENU"] === undefined ? "" : participant.attributes["IVR_LASTMENU"],
+                    UUI_B_Number: IVR_DNIS,
+                    Call_Duration_MM_SS: doubleDuration,
+                    CallDisposition: "Abandon",
+                    CallDurationInSeconds: differenceInSeconds,
+                    Closed_Date_Time: conversationEnd,
+                    CompletedDateTime: conversationEnd,
+                    Opened_Date_Time: conversationStart,
+                    GenesysUser: userName //'agentAppTest'
+                  });
+
+                }
                 //console.log("//////////////");
-                
+
                 //console.log("//////////////");
-                if(dataAbandonList.length >=100  &&  dataAbandonList.length% 100 == 0){
+                if (dataAbandonList.length >= 100 && dataAbandonList.length % 100 == 0) {
                   log.info("Wait for 30 seconds Rate limit exceeded the maximum api Genesys");
                   await delay(30000);
                 }
-                
+
                 break;
               }
             }
@@ -392,8 +396,8 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
         });
     }
   }
-  
-  await log.info( 'acc_in dataAbandonList Size :'+dataAbandonList.length );
+
+  await log.info('acc_in dataAbandonList Size :' + dataAbandonList.length);
   await log.info(`acc_in ====== parserAbandonDetail->Done! =======`);
   return await dataAbandonList;
 };
@@ -406,7 +410,7 @@ let isTransactionAbandonInboundCaptureByQueue = async (data_participants, dataQu
         if ((await obj.name) === "tAbandon") {
           for (const objSegments of item.sessions[0].segments) {
             if (await objSegments.queueId !== undefined) {
-              if (await(objSegments.queueId in dataQueueIdObj)) {
+              if (await (objSegments.queueId in dataQueueIdObj)) {
                 return dataQueueIdObj[objSegments.queueId]
               }
             }
@@ -419,7 +423,7 @@ let isTransactionAbandonInboundCaptureByQueue = async (data_participants, dataQu
 };
 
 let tNotResoinding = async (data_participants) => {
-  let tNotResoindingList =[];
+  let tNotResoindingList = [];
   for (const item of data_participants) {
     if ((await item.sessions[0].metrics) !== undefined) {
       for (const obj of item.sessions[0].metrics) {
@@ -434,7 +438,7 @@ let tNotResoinding = async (data_participants) => {
   }
 
   const hasEmitDate = await tNotResoindingList.some(item => item.emitDate !== undefined);
-  if(await hasEmitDate ){
+  if (await hasEmitDate) {
     await tNotResoindingList.sort((a, b) => new Date(b.emitDate) - new Date(a.emitDate));
   }
 
@@ -455,7 +459,7 @@ let getInfomationQueueAbandon = async (dataTableObj) => {
       (await dataTableObj.entities[i].QUEUE_ID) != ''
     ) {
       var queueId = await dataTableObj.entities[i].QUEUE_ID;
-      var queueName = await dataTableObj.entities[i].QUEUE_NAME; 
+      var queueName = await dataTableObj.entities[i].QUEUE_NAME;
       dataQueueIdObj[queueId] = queueName;
     }
   }
@@ -558,5 +562,5 @@ let parserTelPhoneNumber = async (mobile) => {
 
 module.exports = {
   genAbandonAccInb
- ,ManualGenAbandonAccInb
+  , ManualGenAbandonAccInb
 };

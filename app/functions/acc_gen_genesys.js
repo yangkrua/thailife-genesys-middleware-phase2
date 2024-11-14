@@ -1,7 +1,11 @@
 
 const Client = require("ssh2-sftp-client");
 const sftp = new Client();
-const log = require("./logger.js").LOG;
+//const log = require("./logger.js").LOG;
+const xlog = require('./xlog.js')
+const log = new xlog('./logs/acc_l_abandon_outbound', 'acc_l_abandon_outbound.log');
+log.init();
+
 const fs = require("node:fs");
 
 const path = require("path");
@@ -327,7 +331,7 @@ let parserCDR_ACC_CALLBACK = async (data, dataQueueIdObj) => {
         })
         .catch(async (err) => {
           log.error(`There was a failure calling getConversationsCall, ${err}`);
-          
+
         });
     }
   }
@@ -426,12 +430,12 @@ let ACC_L_ABANDON_OUTBOUND = async (dataQueueIdObj) => {
     order: "asc",
   };
 
-  log.info( `API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body )}` );
+  log.info(`API->postAnalyticsConversationsDetailsQuery(), Body= ${JSON.stringify(body)}`);
   pageTotal = 2;
   dataResult;
 
   dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-  log.info( `API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}` );
+  log.info(`API->postAnalyticsConversationsDetailsQuery(), PageNo=1, Result: ${JSON.stringify(dataResult)}`);
 
   if (
     (await dataResult) !== undefined &&
@@ -443,8 +447,8 @@ let ACC_L_ABANDON_OUTBOUND = async (dataQueueIdObj) => {
     for (let i = 1; i < pageTotal; i++) {
       body.paging.pageNumber = i + 1;
       dataResult = await apiInstance.postAnalyticsConversationsDetailsQuery(body);
-      log.info(`API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}` );
-      
+      log.info(`API->postAnalyticsConversationsDetailsQuery(), PageNo=${body.paging.pageNumber}, Result: ${JSON.stringify(dataResult)}`);
+
       Array.prototype.push.apply(
         conversationObj.conversations,
         dataResult.conversations
@@ -726,7 +730,7 @@ let CallbackGetQueueIdInDataTableByID = async (id) => {
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
       log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
-      
+
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -783,7 +787,7 @@ let VoicemailGetQueueIdInDataTableByID = async (id) => {
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
       log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
-      
+
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -871,7 +875,7 @@ let GetQueueIdInDataTableByID = async (id) => {
     })
     .catch((err) => {
       log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
-      
+
     });
 
   return dataQueueIdObj;
@@ -929,7 +933,7 @@ let ACC_OUT_ABANDON_GetQueueIdInDataTableByID = async (id) => {
     })
     .catch((err) => {
       log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
-      
+
     });
 
   return dataQueueIdObj;
@@ -987,7 +991,7 @@ let ACC_CALLBACK_GetQueueIdInDataTableByID = async (id) => {
     })
     .catch((err) => {
       log.error(`There was a failure calling getFlowsDatatableRows, ${err}`);
-      
+
     });
 
   return dataQueueIdObj;
