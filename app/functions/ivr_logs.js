@@ -3,8 +3,9 @@ const sftp = new Client();
 
 //const log = require("./logger.js").LOG;
 const xlog = require('./xlog.js')
-const log = new xlog('./logs/care_callback', 'care_callback.log');
+const log = new xlog('./logs/ivr_log', 'ivr_log.log');
 log.init();
+
 
 const fs = require("node:fs");
 const moment = require('moment-timezone');
@@ -68,7 +69,7 @@ let getGetListOfQueues = async () => {
             }
         })
         .catch(async (err) => {
-            log.error(`There was a failure calling getGetListOfQueues ,${err}`);
+            log.error(`There was a failure calling getGetListOfQueues , ${err}`);
 
         });
 
@@ -84,7 +85,7 @@ let genAbandonCareCenter = async (env) => {
         .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
         .then(async () => {
 
-            log.info("loginClientCredentialsGrant : ");
+            console.log("loginClientCredentialsGrant : ");
 
             let listOfQueues = await getGetListOfQueues();
             let dataTableObj = await getDataTableByName(config.GENESES.GEN_ABANDON_DATA_TABLE.NAME);
@@ -103,7 +104,7 @@ let genAbandonCareCenter = async (env) => {
                 }
 
                 log.info("dataTableId : " + dataTableId);
-                log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+                log.info(`dataQueueIdObj, data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
                 await analyticsAbandonConversationsDetailsAndGenFile(dataQueueIdObj);
 
@@ -275,7 +276,6 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                                 let differenceInMilliseconds = SEGSTOP - SEGSTART;
                                 // แปลงระยะเวลาเป็นวินาที
                                 let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
-
 
 
                                 let conversationStart = new Date(item.conversationStart).toISOString().replace('Z', '+0000');
@@ -522,7 +522,7 @@ let parserCDR_CARE_VOICEMAIL = async (data, dataQueueIdObj) => {
                     ) {
                         for (let index_p = 0; index_p < data.participants.length; index_p++) {
                             let participant = await data.participants[index_p];
-
+                            // log.info( `API->postAnalyticsConversationsDetailsQuery(), Result: ${JSON.stringify(data)}` );
                             if (
                                 (await participant) !== undefined &&
                                 (await participant.attributes) !== undefined &&
@@ -778,17 +778,17 @@ let parserCDR_IVR_Log = async (data, dataQueueIdObj) => {
                             ) {
                                 let ucid = data.id;
 
-                                let ivrMenuLogString = participant.attributes.IVR_MENU_LOG;
-                                let ivrMenuLogList = ivrMenuLogString.split(';').filter(Boolean);  // Split by ';' and remove empty elements
-                                ivrMenuLogList = ivrMenuLogList.map(item => item.split(','));  // Split each part by ','
+                                let ivrMenuLogString = await participant.attributes.IVR_MENU_LOG;
+                                let ivrMenuLogList = await ivrMenuLogString.split(';').filter(Boolean);  // Split by ';' and remove empty elements
+                                ivrMenuLogList = await ivrMenuLogList.map(item => item.split(','));  // Split each part by ','
 
                                 if (ivrMenuLogList.length > 0) {
                                     for (let indexMenu = 0; indexMenu < ivrMenuLogList.length; indexMenu++) {
                                         let ivrMenuLog = ivrMenuLogList[indexMenu];
                                         if (ivrMenuLog.length == 2) {
 
-                                            let menucode = ivrMenuLog[1];;
-                                            let start_time = ivrMenuLog[0];
+                                            let menucode = await ivrMenuLog[1];;
+                                            let start_time = await ivrMenuLog[0];
                                             let sequence = await (indexMenu + 1);
 
                                             // สร้าง Date object จากสตริงวันที่
@@ -1011,6 +1011,7 @@ let CallbackGetQueueIdInDataTableByID = async (id) => {
             await apiInstance.getFlowsDatatableRows(datatableId, opts)
                 .then(async (dataResult) => {
                     log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+
                     if (
                         (await dataResult) !== undefined &&
                         (await dataResult.total) > 0
@@ -1187,7 +1188,6 @@ let tNotResoinding = async (data_participants) => {
 let parserPhoneNumber = (mobile) => {
     return mobile.replace("+66", "0");
 };
-
 let parserTelPhoneNumber = async (mobile) => {
     if (mobile.startsWith("tel:")) {
         return mobile.replace("tel:", "");
@@ -1196,7 +1196,6 @@ let parserTelPhoneNumber = async (mobile) => {
     }
     return mobile; // ถ้าไม่มีเงื่อนไขใดตรง จะคืนค่าตัวแปร a กลับไป
 };
-
 let convertData = (text) => {
     if (
         (text) == undefined

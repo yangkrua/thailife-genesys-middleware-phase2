@@ -5,7 +5,7 @@ const salesForceService = require("./sales_force_service.js");
 
 //const log = require("./logger.js").LOG;
 const xlog = require('./xlog.js')
-const log = new xlog('./logs/bay_genAbandon', 'bay_genAbandon.log');
+const log = new xlog('./logs/bay_genabandon', 'bay_genabandon.log');
 log.init();
 
 const moment = require('moment-timezone');
@@ -74,7 +74,7 @@ let genAbandon = async (env) => {
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
 
-      console.log("loginClientCredentialsGrant : ");
+      log.info("loginClientCredentialsGrant : ");
 
       let listOfQueues = await getGetListOfQueues();
 
@@ -238,8 +238,8 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                     userName = email.substring(0, email.indexOf('@'));
                   })
                   .catch(async (err) => {
-                    console.log("There was a failure calling getUser");
-                    console.error(err);
+                    log.error(`There was a failure calling getUser , ${err}`);
+
                   });
 
                 let SEGSTART = await moment(item.conversationStart); //SEGSTART
@@ -266,11 +266,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 // แปลงระยะเวลาเป็นวินาที
                 let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-                //console.log(`Duration in seconds: ${differenceInSeconds}`);
 
-                //console.log("//////////////");
-                //console.log(participant.attributes);
-                //console.log("//////////////");
 
                 let conversationStart = new Date(item.conversationStart).toISOString().replace('Z', '+0000');
                 let conversationEnd = new Date(item.conversationEnd).toISOString().replace('Z', '+0000');
@@ -279,7 +275,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 //let conversationEnd = await moment(item.conversationEnd).format('YYYY-MM-DDTHH:mm:ss.SSS+0000');
 
 
-                let uui = participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
+                let uui = await participant.attributes["UUI"] === undefined ? "" : participant.attributes["UUI"];
                 if (uui == '') {
                   uui = "||||"
                 }
@@ -309,9 +305,9 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   let uuiSplit = uui.split('|');
 
                   if (CX_CALLED != '') {
-                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
+                    uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
                   } else {
-                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
+                    uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
                   }
 
 
@@ -476,7 +472,7 @@ let getRowDataInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0

@@ -76,7 +76,7 @@ let genAbandonAccInb = async (env) => {
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
     .then(async () => {
 
-      console.log("loginClientCredentialsGrant : ");
+      log.info("loginClientCredentialsGrant : ");
 
       let listOfQueues = await getGetListOfQueues();
 
@@ -244,8 +244,8 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                     userName = email.substring(0, email.indexOf('@'));
                   })
                   .catch(async (err) => {
-                    console.log("There was a failure calling getUser");
-                    console.error(err);
+                    log.error(`There was a failure calling getUser , ${err}`);
+                    
                   });
 
                 let SEGSTART = await moment(item.conversationStart); //SEGSTART
@@ -271,12 +271,6 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 let differenceInMilliseconds = SEGSTOP - SEGSTART;
                 // แปลงระยะเวลาเป็นวินาที
                 let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
-
-                //console.log(`Duration in seconds: ${differenceInSeconds}`);
-
-                //console.log("//////////////");
-                //console.log(participant.attributes);
-                //console.log("//////////////");
 
 
                 let conversationStart = new Date(item.conversationStart).toISOString().replace('Z', '+0000');
@@ -377,9 +371,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   });
 
                 }
-                //console.log("//////////////");
-
-                //console.log("//////////////");
+                
                 if (dataAbandonList.length >= 100 && dataAbandonList.length % 100 == 0) {
                   log.info("Wait for 30 seconds Rate limit exceeded the maximum api Genesys");
                   await delay(30000);
@@ -486,7 +478,7 @@ let getRowDataInDataTableByID = async (id) => {
   // Returns the rows for the datatable with the given id
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
-      //console.log(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
+      log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0

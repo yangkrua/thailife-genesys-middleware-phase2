@@ -85,7 +85,7 @@ let genAbandonCareCenter = async (env) => {
         .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
         .then(async () => {
 
-            console.log("loginClientCredentialsGrant : ");
+            log.info("loginClientCredentialsGrant : ");
 
             let listOfQueues = await getGetListOfQueues();
             let dataTableObj = await getDataTableByName(config.GENESES.GEN_ABANDON_DATA_TABLE.NAME);
@@ -119,12 +119,12 @@ let genAbandonCareCenter = async (env) => {
 
 let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
 
-    var pDateStart = moment().add(-config.GENESES.data_query_ABANDON_period, "minute");
-    var pDateStop = moment();
+    var pDateStart = await moment().add(-config.GENESES.data_query_ABANDON_period, "minute");
+    var pDateStop = await moment();
 
     if (pDate != null) {
-        pDateStart = moment(pDate + "T00:00:00.000");
-        pDateStop = moment(pDate + "T23:59:59.000");
+        pDateStart = await moment(pDate + "T00:00:00.000");
+        pDateStop = await moment(pDate + "T23:59:59.000");
     }
 
     log.info("pDateStart : " + pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
@@ -170,7 +170,7 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
         (await dataResult.totalHits) > 0
     ) {
         conversationObj = await dataResult;
-        pageTotal = Math.ceil(dataResult.totalHits / 100);
+        pageTotal = await Math.ceil(dataResult.totalHits / 100);
 
         for (let i = 1; i < pageTotal; i++) {
             body.paging.pageNumber = i + 1;
@@ -315,9 +315,9 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                                     let uuiSplit = uui.split('|');
 
                                     if (CX_CALLED != '') {
-                                        uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
+                                        uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
                                     } else {
-                                        uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
+                                        uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
                                     }
 
 
@@ -425,12 +425,12 @@ let Gen_CARE_VOICEMAIL = async () => {
 
 let CARE_VOICEMAIL = async (dataQueueIdObj) => {
 
-    let pDateStart = moment().subtract(config.GENESES.data_query_voicemail_period, 'minute').format("YYYY-MM-DDTHH:mm:ss.SSSZ");
-    let pDateStop = moment().format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+    let pDateStart = await moment().subtract(config.GENESES.data_query_voicemail_period, 'minute').format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+    let pDateStop = await moment().format("YYYY-MM-DDTHH:mm:ss.SSSZ");
 
     if (pDate != null) {
-        pDateStart = moment(pDate + "T00:00:00.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
-        pDateStop = moment(pDate + "T23:59:59.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+        pDateStart = await moment(pDate + "T00:00:00.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+        pDateStop = await moment(pDate + "T23:59:59.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
     }
 
     let pageTotal = 2;
@@ -473,7 +473,7 @@ let CARE_VOICEMAIL = async (dataQueueIdObj) => {
         (await dataResult.totalHits) > 0
     ) {
         conversationObj = await dataResult;
-        pageTotal = Math.ceil(dataResult.totalHits / 100);
+        pageTotal = await Math.ceil(dataResult.totalHits / 100);
 
         for (let i = 1; i < pageTotal; i++) {
             body.paging.pageNumber = i + 1;
@@ -502,9 +502,9 @@ let parserCDR_CARE_VOICEMAIL = async (data, dataQueueIdObj) => {
 
     for (const item of data.conversations) {
 
-        const voicemailValue = isTransactionCaptureVoicemailByQueue(item.participants, dataQueueIdObj);
-        const VoiceValueFirst = voicemailValue[0];
-        const VoiceValueSecond = voicemailValue[1];
+        const voicemailValue = await isTransactionCaptureVoicemailByQueue(item.participants, dataQueueIdObj);
+        const VoiceValueFirst = await voicemailValue[0];
+        const VoiceValueSecond = await voicemailValue[1];
 
         if (VoiceValueFirst) {
             //getVoicemail
@@ -528,8 +528,8 @@ let parserCDR_CARE_VOICEMAIL = async (data, dataQueueIdObj) => {
                                 (await participant.attributes) !== undefined &&
                                 (await participant.attributes.VM_INFO) !== undefined
                             ) {
-                                let ucid = item.conversationId;
-                                let customerphoneNumber = parserPhoneNumber(participant.ani.split(":")[1]);
+                                let ucid = await item.conversationId;
+                                let customerphoneNumber = await parserPhoneNumber(participant.ani.split(":")[1]);
                                 let conversationstartTime = await convertData(participant.startTime);
                                 let policyNumber = await convertData(participant.attributes.POLICY_NUMBER);
 
@@ -660,12 +660,12 @@ let Gen_IVR_Log = async () => {
 
 let Get_IVR_Log = async (dataQueueIdObj) => {
 
-    let pDateStart = moment().subtract(config.GENESES.data_query_ivrlog_period, 'minute').format("YYYY-MM-DDTHH:mm:ss.SSSZ");
-    let pDateStop = moment().format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+    let pDateStart = await moment().subtract(config.GENESES.data_query_ivrlog_period, 'minute').format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+    let pDateStop = await moment().format("YYYY-MM-DDTHH:mm:ss.SSSZ");
 
     if (pDate != null) {
-        pDateStart = moment(pDate + "T00:00:00.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
-        pDateStop = moment(pDate + "T23:59:59.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+        pDateStart = await moment(pDate + "T00:00:00.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+        pDateStop = await moment(pDate + "T23:59:59.000").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
     }
 
     let pageTotal = 2;
@@ -704,7 +704,7 @@ let Get_IVR_Log = async (dataQueueIdObj) => {
         (await dataResult.totalHits) > 0
     ) {
         conversationObj = await dataResult;
-        pageTotal = Math.ceil(dataResult.totalHits / 100);
+        pageTotal = await Math.ceil(dataResult.totalHits / 100);
 
         for (let i = 1; i < pageTotal; i++) {
             body.paging.pageNumber = i + 1;
@@ -719,7 +719,7 @@ let Get_IVR_Log = async (dataQueueIdObj) => {
 
         let lineCDR = await parserCDR_IVR_Log(conversationObj, dataQueueIdObj);
         if (await lineCDR.length > 0) {
-            const lines = lineCDR.split("\n").filter(line => line.trim() !== '');
+            const lines = await lineCDR.split("\n").filter(line => line.trim() !== '');
 
             for (let i = 0; i < lines.length; i++) {
                 let data = [];
@@ -784,7 +784,7 @@ let parserCDR_IVR_Log = async (data, dataQueueIdObj) => {
 
                                 if (ivrMenuLogList.length > 0) {
                                     for (let indexMenu = 0; indexMenu < ivrMenuLogList.length; indexMenu++) {
-                                        let ivrMenuLog = ivrMenuLogList[indexMenu];
+                                        let ivrMenuLog = await ivrMenuLogList[indexMenu];
                                         if (ivrMenuLog.length == 2) {
 
                                             let menucode = await ivrMenuLog[1];;
@@ -950,8 +950,8 @@ let parserCDR_CARE_CALLBACK = async (data, dataQueueIdObj) => {
                                 (await participant.attributes) !== undefined &&
                                 (await participant.attributes.CB_INFO) !== undefined
                             ) {
-                                let ucid = item.conversationId;
-                                let customerphoneNumber = parserPhoneNumber(participant.ani.split(":")[1]);
+                                let ucid = await item.conversationId;
+                                let customerphoneNumber = await parserPhoneNumber(participant.ani.split(":")[1]);
                                 let conversationstartTime = await convertData(participant.startTime);
                                 let policyNumber = await convertData(participant.attributes.POLICY_NUMBER);
 

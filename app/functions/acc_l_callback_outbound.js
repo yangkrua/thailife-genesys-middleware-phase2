@@ -1,6 +1,7 @@
 
 const Client = require("ssh2-sftp-client");
 const sftp = new Client();
+
 //const log = require("./logger.js").LOG;
 const xlog = require('./xlog.js')
 const log = new xlog('./logs/acc_l_callback_outbound', 'acc_l_callback_outbound.log');
@@ -198,8 +199,8 @@ let Gen_ACC_CALLBACK = async () => {
                 let dataTableId = await dataTableObj.entities[0].id;
 
                 let dataQueueIdObj = await CallbackGetQueueIdInDataTableByID(dataTableId);
-                console.log("dataTableId : " + dataTableId);
-                console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+                log.info("dataTableId : " + dataTableId);
+                log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
                 await ACC_CALLBACK(dataQueueIdObj);
 

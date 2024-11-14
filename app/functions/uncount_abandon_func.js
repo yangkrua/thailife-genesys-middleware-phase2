@@ -1,7 +1,11 @@
 const config = require("../config/uncount_abandon_config.js");
 const genesys = require("../config/genesys_server.js");
 
-const log = require("./logger.js").LOG;
+//const log = require("./logger.js").LOG;
+const xlog = require('./xlog.js')
+const log = new xlog('./logs/uncount_abandon', 'uncount_abandon.log');
+log.init();
+
 const moment = require('moment-timezone');
 const platformClient = require("purecloud-platform-client-v2");
 const apiInstance = new platformClient.ConversationsApi();
@@ -28,7 +32,7 @@ let getGetListOfQueues = async () => {
     "pageSize": 100 // Number | Page size
   };
 
-  await apiInstance.getRoutingQueues( opts)
+  await apiInstance.getRoutingQueues(opts)
     .then(async (dataResult) => {
       if (
         (await dataResult) !== undefined &&
@@ -51,7 +55,7 @@ let getGetListOfQueues = async () => {
     })
     .catch(async (err) => {
       log.error(`There was a failure calling getGetListOfQueues , ${err}`);
-      
+
     });
 
   return listOfQueues;
@@ -70,7 +74,7 @@ let getInfomationQueueAbandon = async (dataTableObj) => {
     ) {
       var queueId = await dataTableObj.entities[i].key;
       var queueName = await dataTableObj.entities[i].QUEUE_NAME;
-      var divisionName = await dataTableObj.entities[i].DIVISION_NAME; 
+      var divisionName = await dataTableObj.entities[i].DIVISION_NAME;
 
       if (!dataQueueIdObj[queueId]) {
         dataQueueIdObj[queueId] = {};
@@ -105,7 +109,7 @@ let getRowDataInDataTableByID = async (id) => {
   await apiInstance.getFlowsDatatableRows(datatableId, opts)
     .then(async (dataResult) => {
       log.info(`getFlowsDatatableRows success! data: ${JSON.stringify(dataResult, null, 2)}`);
-      
+
       if (
         (await dataResult) !== undefined &&
         (await dataResult.total) > 0
@@ -127,7 +131,7 @@ let getRowDataInDataTableByID = async (id) => {
     })
     .catch(async (err) => {
       log.error(`There was a failure calling getFlowsDatatableRows , ${err}`);
-      
+
     });
 
   return rowDataObj;
@@ -154,8 +158,8 @@ let getDataTableByName = async (name) => {
       dataTableObj = await data;
     })
     .catch((err) => {
-      log.error(`There was a failure calling getFlowsDatatables , ${err}` );
-      
+      log.error(`There was a failure calling getFlowsDatatables , ${err}`);
+
     }
     );
 
@@ -167,14 +171,15 @@ let analyticsConversationsDetails = async () => {
   var pDateStart = moment().add(-config.GENESES.data_query_period, "minute");
   var pDateStop = moment();
 
-  if(pDate != null){
+  if (pDate != null) {
     pDateStart = moment(pDate + "T00:00:00.000");
     pDateStop = moment(pDate + "T23:59:59.000");
   }
 
-  console.log("pDateStart : "+ pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-  console.log("pDateStop : "+ pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-  console.log("postAnalyticsConversationsDetailsQuery Start...");
+  log.info("pDateStart : " + pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStop : " + pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("postAnalyticsConversationsDetailsQuery Start...");
+
   let pageTotal = 2;
   let dataResult;
   let conversationObj;
@@ -227,14 +232,14 @@ let analyticsConversationsDetails = async () => {
     //conversationObj;
     log.info("postAnalyticsConversationsDetailsQuery End...");
     await processUncountAbandon(conversationObj);
-    
+
   }
 };
 
 
 let uncount_abandon_process = async (inputDate) => {
 
-   pDate = await inputDate;
+  pDate = await inputDate;
 
   await client
     .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
@@ -254,13 +259,13 @@ let uncount_abandon_process = async (inputDate) => {
         for (const key in dataQueueIdObj) {
           if (dataQueueIdObj.hasOwnProperty(key)) {
             let name = "";
-            if( (await listOfQueues.entities.find(element => element.id === key)) === undefined){
-              
-              log.info("Queue not Found key : " +key +" : "+ dataQueueIdObj[key].queueName);
-            }else{
+            if ((await listOfQueues.entities.find(element => element.id === key)) === undefined) {
+
+              log.info("Queue not Found key : " + key + " : " + dataQueueIdObj[key].queueName);
+            } else {
               name = listOfQueues.entities.find(element => element.id === key).name;
             }
-            
+
             dataQueueIdObj[key].queueName = name;
           }
         }
@@ -276,7 +281,7 @@ let uncount_abandon_process = async (inputDate) => {
     .catch(async (error) => {
       log.error(`API->loginClientCredentialsGrant(), error: ${error.message}`);
     });
-    log.info("End Process gen Abandon Care Center :"+await new Date() );
+  log.info("End Process gen Abandon Care Center :" + await new Date());
 };
 
 
@@ -291,15 +296,15 @@ let isTransactionAbandon = async (data_participants) => {
         if ((await obj.name) === "tAbandon") {
           for (const objSegments of item.sessions[0].segments) {
             if (await objSegments.queueId !== undefined) {
-              if (await(objSegments.queueId in dataQueueIdObj)) {
-                if(await dataQueueIdObj[objSegments.queueId]){
-                  let dataQueueObj = {} ;
+              if (await (objSegments.queueId in dataQueueIdObj)) {
+                if (await dataQueueIdObj[objSegments.queueId]) {
+                  let dataQueueObj = {};
                   let queueId = objSegments.queueId;
                   dataQueueObj.participantId = await item.participantId;
                   dataQueueObj.queueId = await dataQueueIdObj[queueId].queueId;
-                  dataQueueObj.queueName =  await dataQueueIdObj[queueId].queueName ;
-                  dataQueueObj.divisionName = await dataQueueIdObj[queueId].divisionName ;
-                  dataQueueObj.timeStart =  await new Date(objSegments.segmentStart)
+                  dataQueueObj.queueName = await dataQueueIdObj[queueId].queueName;
+                  dataQueueObj.divisionName = await dataQueueIdObj[queueId].divisionName;
+                  dataQueueObj.timeStart = await new Date(objSegments.segmentStart)
                   dataQueueObj.timeEnd = await new Date(obj.emitDate)
                   dataQueueObjList.push(dataQueueObj);
                   breakFlag = true;
@@ -308,7 +313,7 @@ let isTransactionAbandon = async (data_participants) => {
               }
             }
           }
-          if(breakFlag) break;
+          if (breakFlag) break;
         }
       }
     }
@@ -328,19 +333,19 @@ let processUncountAbandon = async (conversationObj) => {
     let conversationStart = await new Date(item.conversationStart);
 
     let participantAbandonList = await isTransactionAbandon(item.participants);
-    
-    if (participantAbandonList.length > 0 ) {
 
-      let purposeCustomer = item.participants.find(element => element.purpose  === 'customer');
+    if (participantAbandonList.length > 0) {
+
+      let purposeCustomer = item.participants.find(element => element.purpose === 'customer');
 
       let conversationEnd = await new Date(purposeCustomer.sessions[0].metrics[1].emitDate);
-      
 
-      for(const abandonObj of participantAbandonList){
+
+      for (const abandonObj of participantAbandonList) {
 
         let divisionName = abandonObj.divisionName;
         let timeEnd = abandonObj.timeEnd;
-        let diffInMillisecond = await dateDiffInMilliseconds(timeEnd,conversationEnd)
+        let diffInMillisecond = await dateDiffInMilliseconds(timeEnd, conversationEnd)
         if (diffInMillisecond > 1000) {
           if (!abanDivisionList[divisionName]) {
             abanDivisionList[divisionName] = [];
@@ -351,8 +356,8 @@ let processUncountAbandon = async (conversationObj) => {
           abandonObj.conversationEnd = conversationEnd;
           abanDivisionList[divisionName].push(abandonObj);
 
-          log.info( count + ": ["+divisionName+"] "+"istAbandon conversationId : " + conversationId);
-          count = await count+1;
+          log.info(count + ": [" + divisionName + "] " + "istAbandon conversationId : " + conversationId);
+          count = await count + 1;
         }
       }
     }
@@ -363,40 +368,40 @@ let processUncountAbandon = async (conversationObj) => {
 
   let divisionList = Object.keys(abanDivisionList);
 
-  for(const divisionName of divisionList){
-    for(const queueObj of abanDivisionList[divisionName]){
-      
+  for (const divisionName of divisionList) {
+    for (const queueObj of abanDivisionList[divisionName]) {
+
       let queueName = queueObj.queueName;
       try {
 
-      if (!dataAbandonList[divisionName]) {
-        dataAbandonList[divisionName] = [];
-      }
+        if (!dataAbandonList[divisionName]) {
+          dataAbandonList[divisionName] = [];
+        }
 
-      if (!dataAbandonList[divisionName][queueName]) {
-        dataAbandonList[divisionName][queueName] = [];
-      }
+        if (!dataAbandonList[divisionName][queueName]) {
+          dataAbandonList[divisionName][queueName] = [];
+        }
 
-      dataAbandonList[divisionName][queueName].push(queueObj);
-    }
-    catch(err) {
-      console.log( err);
-    }
+        dataAbandonList[divisionName][queueName].push(queueObj);
+      }
+      catch (err) {
+        log.error(`processUncountAbandon->dataAbandonList, ${err}`);
+      }
     }
   }
-  
+
   log.info("processUncountAbandon End...");
   log.info("generateFileDetailUncountAbandon Start...");
 
-  for(const divisionName of divisionList){
+  for (const divisionName of divisionList) {
 
     let queueList = Object.keys(dataAbandonList[divisionName]);
-    for(const queueName of queueList){
+    for (const queueName of queueList) {
       dataAbandonList[divisionName][queueName];
-      await generateFileDetailUncountAbandon(divisionName,queueName,dataAbandonList[divisionName][queueName]);
-      countCSVfile = countCSVfile+1;
+      await generateFileDetailUncountAbandon(divisionName, queueName, dataAbandonList[divisionName][queueName]);
+      countCSVfile = countCSVfile + 1;
     }
-    
+
   }
   log.info("generateFileDetailUncountAbandon End...");
 };
@@ -408,16 +413,16 @@ function dateDiffInMilliseconds(date1, date2) {
   const date2Ms = new Date(date2).getTime();
 
   // Calculate the difference in milliseconds
-  return Math.abs(date2Ms - date1Ms) ;
+  return Math.abs(date2Ms - date1Ms);
 }
 
 async function formatDateToString(date) {
   const padToTwoDigits = (num) => (num < 10 ? '0' + num : num);
-  
+
   const day = padToTwoDigits(date.getDate());
   const month = padToTwoDigits(date.getMonth() + 1); // Months are zero-indexed
   const year = date.getFullYear();
-  
+
   const hours = padToTwoDigits(date.getHours());
   const minutes = padToTwoDigits(date.getMinutes());
   const seconds = padToTwoDigits(date.getSeconds());
@@ -437,18 +442,18 @@ let parserTelPhoneNumber = async (mobile) => {
   return mobile; // ถ้าไม่มีเงื่อนไขใดตรง จะคืนค่าตัวแปร a กลับไป
 };
 
-let generateFileDetailUncountAbandon = async (divisionName,queueName,abandonList) => {
-  
+let generateFileDetailUncountAbandon = async (divisionName, queueName, abandonList) => {
+
   //console.log( divisionName);
 
   let csvContent = '\uFEFF'; // Adding BOM to the beginning
 
   let csvContentTemp = 'No.,Conversation Start,Conversation End,Date Queue Start,Date Queue End,Queue Name,Conversation ID,ANI\n'; // Headers
-  let index ;
-  for(let i=0 ; i < abandonList.length ; i++){
-  
+  let index;
+  for (let i = 0; i < abandonList.length; i++) {
+
     let detail = abandonList[i];
-    index = i+1;
+    index = i + 1;
     let conversationStart = await formatDateToString(detail.conversationStart);
     let dateQueueStart = await formatDateToString(detail.timeStart);
     let dateQueueEnd = await formatDateToString(detail.timeEnd);
@@ -458,11 +463,11 @@ let generateFileDetailUncountAbandon = async (divisionName,queueName,abandonList
     //let ani =  `"${await parserTelPhoneNumber(detail.ani)}"` ;
     let ani = detail.ani;
     csvContentTemp += `${index},${conversationStart},${conversationEnd},${dateQueueStart},${dateQueueEnd},${queueName},${conversationId},${ani}`;
-    
+
     csvContentTemp += '\n';
   }
 
-  csvContent += 'Totol Record '+index+' Row,,,,,,,\n'
+  csvContent += 'Totol Record ' + index + ' Row,,,,,,,\n'
   csvContentTemp += '\n';
   csvContent += csvContentTemp;
 
@@ -472,23 +477,23 @@ let generateFileDetailUncountAbandon = async (divisionName,queueName,abandonList
 
   // ฟังก์ชันเพื่อเติมเลข 0 ข้างหน้า (ถ้าจำเป็น)
   const padZero = (num, size) => String(num).padStart(size, '0');
-  
+
   // สร้างฟอร์แมตตามที่ต้องการ  // Output: 20240914_104257828
-  const formattedDateTime = 
-    now.getFullYear() + 
-    padZero(now.getMonth() + 1, 2) + 
+  const formattedDateTime =
+    now.getFullYear() +
+    padZero(now.getMonth() + 1, 2) +
     padZero(now.getDate(), 2) + '_' +
-    padZero(now.getHours(), 2) + 
-    padZero(now.getMinutes(), 2) + 
-    padZero(now.getSeconds(), 2) + 
+    padZero(now.getHours(), 2) +
+    padZero(now.getMinutes(), 2) +
+    padZero(now.getSeconds(), 2) +
     padZero(now.getMilliseconds(), 3);
-  
-  let pathFile =  config.data_process_inbox ; 
+
+  let pathFile = config.data_process_inbox;
   let fileName = `${pathFile}/${divisionName}_[${queueName}]_${formattedDateTime}.csv`;
 
-  await  writeCsvToFile(fileName, formattedCsvContent);
+  await writeCsvToFile(fileName, formattedCsvContent);
   // Write the CSV string to a file
- 
+
 
 
 };
@@ -496,7 +501,7 @@ let generateFileDetailUncountAbandon = async (divisionName,queueName,abandonList
 async function writeCsvToFile(fileName, formattedCsvContent) {
   try {
     await fs.writeFile(fileName, formattedCsvContent, { encoding: 'utf8' });
-    log.info(countCSVfile +': CSV file has been written successfully: ' + fileName);
+    log.info(countCSVfile + ': CSV file has been written successfully: ' + fileName);
   } catch (err) {
     log.error(`Error writing to file, ${err} `);
   }
@@ -504,14 +509,14 @@ async function writeCsvToFile(fileName, formattedCsvContent) {
 
 async function formatCsvContent(csvContent) {
   return csvContent
-      .split('\n') // แยกแต่ละบรรทัด
-      .map(line => 
-          line
-              .split(',') // แยกคอลัมน์ด้วย comma
-              .map(column => `"${column.trim()}"`) // ใส่ quote ครอบทุกคอลัมน์
-              .join(',') // รวมกลับเป็นบรรทัดเดียว
-      )
-      .join('\n'); // รวมทุกบรรทัดกลับเข้าด้วยกัน
+    .split('\n') // แยกแต่ละบรรทัด
+    .map(line =>
+      line
+        .split(',') // แยกคอลัมน์ด้วย comma
+        .map(column => `"${column.trim()}"`) // ใส่ quote ครอบทุกคอลัมน์
+        .join(',') // รวมกลับเป็นบรรทัดเดียว
+    )
+    .join('\n'); // รวมทุกบรรทัดกลับเข้าด้วยกัน
 }
 module.exports = {
   uncount_abandon_process

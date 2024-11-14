@@ -55,7 +55,7 @@ let getEvaluationInfomation = async () => {
 
   const userAnswersDataList = [];
 
-  await console.log("Start Loop analyzeEvaluationDetail :" + await new Date());
+  await log.info("Start Loop analyzeEvaluationDetail :" + await new Date());
   let maxQuestionAndAnswers = 0;
   for (let i = 0; i < evaluationDetailList.length; i++) {
     const evaluationDetail = await evaluationDetailList[i];
@@ -247,7 +247,7 @@ let generateCSVFile = async (userAnswersDataList, maxQuestionAndAnswers) => {
   const padZero = (num, size) => String(num).padStart(size, '0');
 
   // สร้างฟอร์แมตตามที่ต้องการ  // Output: 20240914_104257828
-  const formattedDateTime =
+  const formattedDateTime = await
     now.getFullYear() +
     padZero(now.getMonth() + 1, 2) +
     padZero(now.getDate(), 2) + '_' +
@@ -276,10 +276,10 @@ let filterQuestionScores = async (answersEvaluation, evaluationFormDetailGenesys
 
   const questionScoreDetailList = [];
   for (let i = 0; i < questionGroupScoreList.length; i++) {
-    const questionGroupScore = questionGroupScoreList[i];
+    const questionGroupScore = await questionGroupScoreList[i];
 
-    const questionGroupId = questionGroupScore.questionGroupId;
-    const questionScoreList = questionGroupScore.questionScores;
+    const questionGroupId = await questionGroupScore.questionGroupId;
+    const questionScoreList = await questionGroupScore.questionScores;
 
     let questionGroupName = await evaluationFormDetailGenesysList
       .flatMap(obj => obj.questionGroupsList) // Flatten categories arrays
@@ -393,7 +393,7 @@ let getConversationEvaluationDetail = async () => {
 let initFormQuestionDetail = async (evaluationFormGenesysList) => {
 
   for (let i = 0; i < evaluationFormGenesysList.length; i++) {
-    let formId = evaluationFormGenesysList[i].id;
+    let formId = await evaluationFormGenesysList[i].id;
     evaluationFormGenesysList[i].questionGroupsList = await genesysService.getListFormDetailGenesys(formId);
   }
 

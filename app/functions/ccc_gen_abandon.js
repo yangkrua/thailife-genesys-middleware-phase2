@@ -75,7 +75,7 @@ let genAbandon = async (env) => {
         .loginClientCredentialsGrant(CLIENT_ID, CLIENT_SECRET)
         .then(async () => {
 
-            console.log("loginClientCredentialsGrant : ");
+            log.info("loginClientCredentialsGrant : ");
 
             let listOfQueues = await getGetListOfQueues();
             let dataTableObj = await getDataTableByName(config.GENESES.GEN_ABANDON_DATA_TABLE.NAME);
@@ -87,7 +87,7 @@ let genAbandon = async (env) => {
                 let dataQueueIdObj = await getInfomationQueueAbandon(rowDataObj);
 
                 for (const key in dataQueueIdObj) {
-                    console.log("key : ", key);
+                    log.info("key : ", key);
                     if (dataQueueIdObj.hasOwnProperty(key)) {
                         const name = listOfQueues.entities.find(element => element.id === key).name;
                         dataQueueIdObj[key] = name;
@@ -118,8 +118,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
         pDateStop = moment(pDate + "T23:59:59.000");
     }
 
-    console.log("pDateStart : " + pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-    console.log("pDateStop : " + pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+    log.info("pDateStart : " + pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+    log.info("pDateStop : " + pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
 
     let pageTotal = 2;
     let dataResult;
@@ -264,7 +264,6 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                                 // แปลงระยะเวลาเป็นวินาที
                                 let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-                                //console.log(`Duration in seconds: ${differenceInSeconds}`);
 
 
                                 let conversationStart = new Date(item.conversationStart).toISOString().replace('Z', '+0000');
@@ -378,8 +377,8 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                     }
                 })
                 .catch(async (err) => {
-                    console.log("There was a failure calling getConversationsCall");
-                    console.error(err);
+                    log.error(`There was a failure calling getConversationsCall , ${err}`);
+
                 });
         }
     }

@@ -287,7 +287,6 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 // แปลงระยะเวลาเป็นวินาที
                 let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-                //console.log(`Duration in seconds: ${differenceInSeconds}`);
 
                 let conversationStart = new Date(item.conversationStart).toISOString().replace('Z', '+0000');
                 let conversationEnd = new Date(item.conversationEnd).toISOString().replace('Z', '+0000');
@@ -326,9 +325,9 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   let uuiSplit = uui.split('|');
 
                   if (CX_CALLED != '') {
-                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
+                    uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
                   } else {
-                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
+                    uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
                   }
 
 

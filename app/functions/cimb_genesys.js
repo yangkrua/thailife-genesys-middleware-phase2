@@ -117,8 +117,8 @@ let analyticsAbandonConversationsDetailsAndGenFile = async (dataQueueIdObj) => {
     pDateStop = moment(pDate + "T23:59:59.000");
   }
 
-  console.log("pDateStart : " + pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
-  console.log("pDateStop : " + pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStart : " + pDateStart.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+  log.info("pDateStop : " + pDateStop.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
 
   let pageTotal = 2;
   let dataResult;
@@ -267,7 +267,7 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                 // แปลงระยะเวลาเป็นวินาที
                 let differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-                //console.log(`Duration in seconds: ${differenceInSeconds}`);
+
 
 
                 let conversationStart = new Date(item.conversationStart).toISOString().replace('Z', '+0000');
@@ -308,9 +308,9 @@ let parserAbandonDetail = async (data, dataQueueIdObj) => {
                   let uuiSplit = uui.split('|');
 
                   if (CX_CALLED != '') {
-                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
+                    uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + IVR_DNIS
                   } else {
-                    uui = uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
+                    uui = await uuiSplit[0] + '|' + uuiSplit[1] + '|' + uuiSplit[2] + '|' + uuiSplit[3] + "|" + DNIS_NUMBER
                   }
 
 

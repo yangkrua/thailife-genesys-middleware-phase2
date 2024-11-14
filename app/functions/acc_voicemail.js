@@ -1,6 +1,7 @@
 
 const Client = require("ssh2-sftp-client");
 const sftp = new Client();
+
 //const log = require("./logger.js").LOG;
 const xlog = require('./xlog.js')
 const log = new xlog('./logs/acc_voicemail', 'acc_voicemail.log');
@@ -198,8 +199,8 @@ let Gen_ACC_CALLBACK = async () => {
                 let dataTableId = await dataTableObj.entities[0].id;
 
                 let dataQueueIdObj = await CallbackGetQueueIdInDataTableByID(dataTableId);
-                console.log("dataTableId : " + dataTableId);
-                console.log(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
+                log.info("dataTableId : " + dataTableId);
+                log.info(`dataQueueIdObj ! data: ${JSON.stringify(dataQueueIdObj, null, 2)}`);
 
                 await ACC_CALLBACK(dataQueueIdObj);
 
@@ -601,18 +602,18 @@ let parserCDR_ACC_L_CALLBACK_OUTBOUND = async (data, dataQueueIdObj) => {
                                         log.error(`ACC_OUTB_Callback There was a failure calling postConversationDisconnect : ${conversationId}, ${err}`);
                                     });
                                 //ratchawin
-                                textCRD += (parserPhoneNumber(item.participants[0].sessions[0].ani.split(":")[1]) + "|"); //CALLING_PTY
-                                textCRD += "P|"; //STATUS
-                                textCRD += moment().format("YYYY-MM-DD HH:mm:ss") + "|"; //IMPORT_DATE
-                                textCRD += moment().format("YYYY-MM-DD HH:mm:ss") + "|"; //CHG_TIME
-                                textCRD += (item.conversationId + "|"); //CALLID
-                                textCRD += (moment(item.conversationStart).format("YYYY-MM-DD HH:mm:ss") + "|"); //SEGSTART
-                                textCRD += (moment(item.conversationEnd).format("YYYY-MM-DD HH:mm:ss") + "|"); //SEGSTOP
-                                textCRD += "3|"; //DISPOSITION
-                                textCRD += (parserPhoneNumber(item.participants[0].sessions[0].dnis.split(":")[1]) + "|"); //DISPVDN
-                                textCRD += (item.conversationId + "|"); //UCID
-                                textCRD += 999;
-                                textCRD += "\n";
+                                textCRD += await (parserPhoneNumber(item.participants[0].sessions[0].ani.split(":")[1]) + "|"); //CALLING_PTY
+                                textCRD += await "P|"; //STATUS
+                                textCRD += await moment().format("YYYY-MM-DD HH:mm:ss") + "|"; //IMPORT_DATE
+                                textCRD += await moment().format("YYYY-MM-DD HH:mm:ss") + "|"; //CHG_TIME
+                                textCRD += await (item.conversationId + "|"); //CALLID
+                                textCRD += await (moment(item.conversationStart).format("YYYY-MM-DD HH:mm:ss") + "|"); //SEGSTART
+                                textCRD += await (moment(item.conversationEnd).format("YYYY-MM-DD HH:mm:ss") + "|"); //SEGSTOP
+                                textCRD += await "3|"; //DISPOSITION
+                                textCRD += await (parserPhoneNumber(item.participants[0].sessions[0].dnis.split(":")[1]) + "|"); //DISPVDN
+                                textCRD += await (item.conversationId + "|"); //UCID
+                                textCRD += await 999;
+                                textCRD += await "\n";
                                 break;
                             }
                         }
