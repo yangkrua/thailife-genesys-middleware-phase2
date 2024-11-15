@@ -1,29 +1,62 @@
-*/10 * * * * /home/genesys/middleware/genesys_middleware_phase2/Get_Survey_Detail.sh
-0 17-23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_CALLBACK.sh
-0 0-9 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_CALLBACK.sh
-0 17-23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_VOICEMAIL.sh
-0 0-9 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_VOICEMAIL.sh
-0 21-23 * * * /home/genesys/middleware/genesys_middleware_phase2/care_callback.sh
-0 0-8 * * * /home/genesys/middleware/genesys_middleware_phase2/care_callback.sh
-0 21-23 * * * /home/genesys/middleware/genesys_middleware_phase2/care_voicemail.sh
-0 0-8 * * * /home/genesys/middleware/genesys_middleware_phase2/care_voicemail.sh
-0 * * * *  /home/genesys/middleware/genesys_middleware_phase2/TLP_Voicemail.sh
-0 * * * *  /home/genesys/middleware/genesys_middleware_phase2/ivr_log.sh
-0 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_INB_genAbandon.sh
-5 23 * * * /home/genesys/middleware/genesys_middleware_phase2/bay_genAbandon.sh
-10 23 * * * /home/genesys/middleware/genesys_middleware_phase2/care_center_genAbandon.sh
-15 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ccc_genAbandon.sh
-20 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ccd_genAbandon.sh
-25 23 * * * /home/genesys/middleware/genesys_middleware_phase2/cimb_genAbandon.sh
-30 23 * * * /home/genesys/middleware/genesys_middleware_phase2/crm_genAbandon.sh
-35 23 * * * /home/genesys/middleware/genesys_middleware_phase2/pos_genAbandon.sh
-40 23 * * * /home/genesys/middleware/genesys_middleware_phase2/ucc_genAbandon.sh
-0 8-17 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_L_ABANDON_OUTBOUND.sh
-0 18-23 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_L_CALLBACK_OUTBOUND.sh
-0 0-8 * * * /home/genesys/middleware/genesys_middleware_phase2/ACC_L_CALLBACK_OUTBOUND.sh
+========================
+Crontab-Jobs
+========================
+ 1.) */10 * * * *   /home/genesys/middleware/genesys_middleware_phase2/Get_Survey_Detail.sh
+ 2.) 40 17-23 * * *  /home/genesys/middleware/genesys_middleware_phase2/ACC_CALLBACK.sh
+ 3.) 40 0-8 * * *    /home/genesys/middleware/genesys_middleware_phase2/ACC_CALLBACK.sh
+ 4.) 40 17-23 * * *  /home/genesys/middleware/genesys_middleware_phase2/ACC_VOICEMAIL.sh
+ 5.) 40 0-8 * * *    /home/genesys/middleware/genesys_middleware_phase2/ACC_VOICEMAIL.sh
+ 6.) 0 21-23 * * *  /home/genesys/middleware/genesys_middleware_phase2/care_callback.sh
+ 7.) 0 0-8 * * *    /home/genesys/middleware/genesys_middleware_phase2/care_callback.sh
+ 8.) 0 21-23 * * *  /home/genesys/middleware/genesys_middleware_phase2/care_voicemail.sh
+ 9.) 0 0-8 * * *    /home/genesys/middleware/genesys_middleware_phase2/care_voicemail.sh
+10.) 0 * * * *      /home/genesys/middleware/genesys_middleware_phase2/TLP_Voicemail.sh
+11.) 0 * * * *      /home/genesys/middleware/genesys_middleware_phase2/ivr_log.sh
+12.) 0 23 * * *     /home/genesys/middleware/genesys_middleware_phase2/ACC_INB_genAbandon.sh
+13.) 5 23 * * *     /home/genesys/middleware/genesys_middleware_phase2/bay_genAbandon.sh
+14.) 10 23 * * *    /home/genesys/middleware/genesys_middleware_phase2/care_center_genAbandon.sh
+15.) 15 23 * * *    /home/genesys/middleware/genesys_middleware_phase2/ccc_genAbandon.sh
+16.) 20 23 * * *    /home/genesys/middleware/genesys_middleware_phase2/ccd_genAbandon.sh
+17.) 25 23 * * *    /home/genesys/middleware/genesys_middleware_phase2/cimb_genAbandon.sh
+18.) 30 23 * * *    /home/genesys/middleware/genesys_middleware_phase2/crm_genAbandon.sh
+19.) 35 23 * * *    /home/genesys/middleware/genesys_middleware_phase2/pos_genAbandon.sh
+20.) 40 23 * * *    /home/genesys/middleware/genesys_middleware_phase2/ucc_genAbandon.sh
+21.) 0 8-17 * * *   /home/genesys/middleware/genesys_middleware_phase2/ACC_L_ABANDON_OUTBOUND.sh
+22.) 0 18-23 * * *  /home/genesys/middleware/genesys_middleware_phase2/ACC_L_CALLBACK_OUTBOUND.sh
+23.) 0 0-8 * * *    /home/genesys/middleware/genesys_middleware_phase2/ACC_L_CALLBACK_OUTBOUND.sh
 
 
 
+application-root-path: /home/genesys/middleware/genesys_middleware_phase2
+logs-root-path: /home/genesys/middleware/genesys_middleware_phase2/logs
+logs-child-path: /home/genesys/middleware/genesys_middleware_phase2/logs/acc_callback/acc_callback.log.2024-10-26
+
+=================================================================================
+Script-Crontab                   | Schedule-Time        |Javascript-File
+=================================================================================
+1. Get_Survey_Detail.sh          | */10 * * * *         | Get_Survey_Detail.js
+2. ACC_CALLBACK.sh               | 40 17-23 * * *       | ACC_CALLBACK.js
+3. ACC_CALLBACK.sh               | 40 0-9 * * *         | ACC_CALLBACK.js
+4. ACC_VOICEMAIL.sh              | 40 17-23 * * *       | ACC_VOICEMAIL.js
+5. ACC_VOICEMAIL.sh              | 40 0-8 * * *         | ACC_VOICEMAIL.js 
+6. care_callback.sh              | 0 21-23 * * *        | care_callback.js
+7. care_callback.sh              | 0 0-8 * * *          | care_callback.js
+8. care_voicemail.sh             | 0 21-23 * * *        | care_voicemail.js
+9. care_voicemail.sh             | 0 0-8 * * *          | care_voicemail.js 
+10. TLP_Voicemail.sh             | 0 * * * *            | TLP_Voicemail.js
+11. ivr_log.sh                   | 0 * * * *            | ivr_log.js
+12. ACC_INB_genAbandon.sh        | 0 23 * * *           | ACC_INB_genAbandon.js
+13. bay_genAbandon.sh            | 5 23 * * *           | bay_genAbandon.js
+14. care_center_genAbandon.sh    | 10 23 * * *          | care_center_genAbandon.js
+15. ccc_genAbandon.sh            | 15 23 * * *          | ccc_genAbandon.js
+16. ccd_genAbandon.sh            | 20 23 * * *          | ccd_genAbandon.js
+17. cimb_genAbandon.sh           | 25 23 * * *          | cimb_genAbandon.js
+18. crm_genAbandon.sh            | 30 23 * * *          | crm_genAbandon.js  
+19. pos_genAbandon.sh            | 25 23 * * *          | pos_genAbandon.js
+20. ucc_genAbandon.sh            | 40 23 * * *          | ucc_genAbandon.js
+21. ACC_L_ABANDON_OUTBOUND.sh    | 0 8-17 * * *         | ACC_L_ABANDON_OUTBOUND.js
+22. ACC_L_CALLBACK_OUTBOUND.sh   | 0 18-23 * * *        | ACC_L_CALLBACK_OUTBOUND.js
+23. ACC_L_CALLBACK_OUTBOUND.sh   | 0 0-8 * * *          | ACC_L_CALLBACK_OUTBOUND.js
 
 
 
